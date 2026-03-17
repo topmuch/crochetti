@@ -155,7 +155,7 @@ const useTheme = () => useContext(ThemeContext)
 // TYPES
 // ============================================
 
-type ViewType = 'landing' | 'explorer' | 'creators' | 'boutique' | 'dashboard' | 'profile' | 'messages' | 'comments' | 'analytics' | 'shop-manage' | 'planner' | 'subscribers' | 'superadmin' | 'admin-users' | 'admin-content' | 'admin-analytics' | 'admin-revenue' | 'admin-settings'
+type ViewType = 'landing' | 'explorer' | 'creators' | 'boutique' | 'product' | 'cart' | 'checkout' | 'creator-profile' | 'dashboard' | 'profile' | 'messages' | 'comments' | 'analytics' | 'shop-manage' | 'planner' | 'subscribers' | 'superadmin' | 'admin-users' | 'admin-content' | 'admin-analytics' | 'admin-revenue' | 'admin-settings'
 
 // User role type
 type UserRole = 'user' | 'creator' | 'admin' | 'superadmin'
@@ -239,11 +239,21 @@ interface Product {
   price: number
   category: string
   creator: string
+  creatorId?: number
+  creatorAvatar?: string
   rating: number
   reviews: number
   description?: string
   stock?: number
   createdAt?: string
+  details?: string[]
+  materials?: string[]
+  difficulty?: 'Débutant' | 'Intermédiaire' | 'Avancé' | 'Expert'
+  timeToComplete?: string
+  images?: string[]
+  language?: string
+  pages?: number
+  featured?: boolean
 }
 
 interface SearchResult {
@@ -336,10 +346,135 @@ const creators: Creator[] = [
 ]
 
 const initialProducts: Product[] = [
-  { id: 1, title: "Patron Lapin Amigurumi", image: "/images/projects/bunny.png", price: 8.99, category: "Patrons", creator: "Sophie L.", rating: 4.8, reviews: 45, stock: 999, createdAt: "2024-01-15" },
-  { id: 2, title: "Kit Bonnet Ourson", image: "/images/projects/bear-hat.png", price: 24.99, category: "Kits", creator: "Marie C.", rating: 4.9, reviews: 32, stock: 25, createdAt: "2024-02-10" },
-  { id: 3, title: "Patron Cardigan Bébé", image: "/images/projects/cardigan.png", price: 12.99, category: "Patrons", creator: "Emma R.", rating: 4.7, reviews: 28, stock: 999, createdAt: "2024-02-20" },
-  { id: 4, title: "Kit Couverture Granny", image: "/images/projects/blanket.png", price: 45.99, category: "Kits", creator: "Claire D.", rating: 4.9, reviews: 56, stock: 15, createdAt: "2024-03-01" },
+  {
+    id: 1,
+    title: "Patron Lapin Amigurumi",
+    image: "/images/projects/bunny.png",
+    price: 8.99,
+    category: "Patrons",
+    creator: "Sophie L.",
+    creatorId: 2,
+    creatorAvatar: "/images/creators/creator2.png",
+    rating: 4.8,
+    reviews: 45,
+    stock: 999,
+    createdAt: "2024-01-15",
+    description: "Créez un adorable lapin amigurumi avec ce patron PDF détaillé. Parfait pour les débutants comme pour les crocheteurs expérimentés. Ce modèle inclut des instructions pas à pas avec des photos pour chaque étape.",
+    details: ["Patron PDF de 12 pages avec photos", "Instructions détaillées étape par étape", "Guide des points utilisés inclus", "Taille finale: 20cm de hauteur", "Compatible débutant"],
+    materials: ["Coton mercerisé 3.5mm", "Crochet 3mm", "Rembourrage polyester", "Yeux de sécurité 8mm", "Aiguille à laine"],
+    difficulty: "Débutant",
+    timeToComplete: "4-6 heures",
+    language: "Français",
+    pages: 12,
+    featured: true
+  },
+  {
+    id: 2,
+    title: "Kit Bonnet Ourson",
+    image: "/images/projects/bear-hat.png",
+    price: 24.99,
+    category: "Kits",
+    creator: "Marie C.",
+    creatorId: 1,
+    creatorAvatar: "/images/creators/creator1.png",
+    rating: 4.9,
+    reviews: 32,
+    stock: 25,
+    createdAt: "2024-02-10",
+    description: "Kit complet pour créer un bonnet ourson adorable pour bébé. Ce kit contient tout le matériel nécessaire ainsi que le patron détaillé. Parfait pour offrir ou pour commencer le crochet!",
+    details: ["Kit complet avec tout le matériel inclus", "Laine premium hypoallergénique", "Patron détaillé avec schémas", "Taille: 6-12 mois (adaptable)", "Idée cadeau parfaite"],
+    materials: ["Laine 100% coton bio", "Crochet 4mm inclus", "Boutons en bois", "Fourniture de marque-page", "Patron imprimé"],
+    difficulty: "Intermédiaire",
+    timeToComplete: "6-8 heures",
+    language: "Français",
+    pages: 8,
+    featured: true
+  },
+  {
+    id: 3,
+    title: "Patron Cardigan Bébé",
+    image: "/images/projects/cardigan.png",
+    price: 12.99,
+    category: "Patrons",
+    creator: "Emma R.",
+    creatorId: 4,
+    creatorAvatar: "/images/creators/creator4.png",
+    rating: 4.7,
+    reviews: 28,
+    stock: 999,
+    createdAt: "2024-02-20",
+    description: "Un patron élégant pour créer un cardigan bébé doux et confortable. Ce modèle features des manches longues et une jolie bordure en point d'écrevisse.",
+    details: ["Patron PDF de 18 pages", "5 tailles incluses (prématuré à 24 mois)", "Schémas de montage détaillés", "Vidéo tutoriel incluse", "Support créateur par message"],
+    materials: ["Laine mérinos douce", "Crochet 3.5mm", "Boutons nacre", "Marqueurs de mailles"],
+    difficulty: "Intermédiaire",
+    timeToComplete: "10-15 heures",
+    language: "Français",
+    pages: 18
+  },
+  {
+    id: 4,
+    title: "Kit Couverture Granny Square",
+    image: "/images/projects/blanket.png",
+    price: 45.99,
+    category: "Kits",
+    creator: "Claire D.",
+    creatorId: 3,
+    creatorAvatar: "/images/creators/creator3.png",
+    rating: 4.9,
+    reviews: 56,
+    stock: 15,
+    createdAt: "2024-03-01",
+    description: "Ce kit premium contient tout le nécessaire pour créer une magnifique couverture granny square colorée. Y compris 15 pelotes de laine de qualité supérieure.",
+    details: ["Kit complet premium", "15 pelotes de laine incluse", "Patron avec 10 motifs différents", "Taille finale: 120x150cm", "Livré dans un beau coffret cadeau"],
+    materials: ["15 pelotes laine 100% coton", "Crochet 4mm inclus", "Aiguille à laine", "Patron détaillé", "Coffret de rangement"],
+    difficulty: "Avancé",
+    timeToComplete: "30-40 heures",
+    language: "Français",
+    pages: 24,
+    featured: true
+  },
+  {
+    id: 5,
+    title: "Sac Bohème Chic",
+    image: "/images/projects/bag.png",
+    price: 18.99,
+    category: "Accessoires",
+    creator: "Léa M.",
+    creatorId: 5,
+    creatorAvatar: "/images/creators/creator5.png",
+    rating: 4.6,
+    reviews: 19,
+    stock: 50,
+    createdAt: "2024-03-05",
+    description: "Patron pour créer un sac de marché bohème élégant et fonctionnel. Ce design moderne avec ses anses en bois est parfait pour les sorties.",
+    details: ["Patron PDF de 10 pages", "Design moderne et élégant", "Doublure expliquée en détail", "Dimensions: 35x40x15cm", "Vidéo d'aide incluse"],
+    materials: ["Coton cordé", "Ans en bois", "Doublure en coton", "Crochet 5mm", "Bouton pression"],
+    difficulty: "Intermédiaire",
+    timeToComplete: "12-15 heures",
+    language: "Français",
+    pages: 10
+  },
+  {
+    id: 6,
+    title: "Bouquet de Fleurs Éternelles",
+    image: "/images/projects/flowers.png",
+    price: 14.99,
+    category: "Maison",
+    creator: "Anaïs P.",
+    creatorId: 6,
+    creatorAvatar: "/images/creators/creator6.png",
+    rating: 4.8,
+    reviews: 41,
+    stock: 999,
+    createdAt: "2024-03-10",
+    description: "Créez un magnifique bouquet de fleurs crochetées qui ne fanera jamais! Ce patron inclut 7 variétés de fleurs différentes.",
+    details: ["7 motifs de fleurs différents", "Instructions d'assemblage", "Fleurs: roses, tournesols, tulipes...", "Idéal pour la décoration", "Niveau débutant à intermédiaire"],
+    materials: ["Fil coton multicolore", "Fil floral", "Crochet 2.5mm", "Feutrine verte"],
+    difficulty: "Intermédiaire",
+    timeToComplete: "8-12 heures",
+    language: "Français",
+    pages: 16
+  }
 ]
 
 // Products Context
@@ -358,6 +493,29 @@ const ProductsContext = createContext<ProductsContextType>({
 })
 
 const useProducts = () => useContext(ProductsContext)
+
+// Cart Context
+interface CartContextType {
+  items: CartItem[]
+  addToCart: (product: Product) => void
+  removeFromCart: (productId: number) => void
+  updateQuantity: (productId: number, quantity: number) => void
+  clearCart: () => void
+  totalItems: number
+  totalPrice: number
+}
+
+const CartContext = createContext<CartContextType>({
+  items: [],
+  addToCart: () => {},
+  removeFromCart: () => {},
+  updateQuantity: () => {},
+  clearCart: () => {},
+  totalItems: 0,
+  totalPrice: 0
+})
+
+const useCart = () => useContext(CartContext)
 
 const categories = [
   { icon: Shirt, name: "Vêtements", count: 234, color: "bg-terracotta" },
@@ -1005,11 +1163,21 @@ function LuxuryLandingPage({ onNavigate, products: externalProducts }: { onNavig
             </span>
             <div className="hidden md:flex items-center gap-8">
               <a href="#categories" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Explorer</a>
-              <a href="#creators" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Créateurs</a>
+              <button onClick={() => onNavigate('creators')} className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Créateurs</button>
+              <button onClick={() => onNavigate('boutique')} className="text-[#3D2914]/70 hover:text-[#D4AF37] transition-colors text-sm font-medium flex items-center gap-1">
+                <ShoppingBag className="w-4 h-4" /> Boutique
+              </button>
               <a href="#features" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Fonctionnalités</a>
               <a href="#pricing" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Tarifs</a>
             </div>
             <div className="flex items-center gap-3">
+              <Button 
+                variant="outline"
+                className="border-[#D4AF37]/50 text-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-full"
+                onClick={() => onNavigate('boutique')}
+              >
+                <ShoppingBag className="w-4 h-4 mr-2" /> Boutique
+              </Button>
               <Button 
                 variant="ghost" 
                 className="text-[#3D2914] hover:bg-[#E07A5F]/10"
@@ -1227,6 +1395,169 @@ function LuxuryLandingPage({ onNavigate, products: externalProducts }: { onNavig
         </div>
       </section>
 
+      {/* Boutique Section - Featured Products */}
+      <section className="py-24 bg-gradient-to-b from-[#FDFCF0] to-[#FAF9F6]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B8962F] flex items-center justify-center">
+                  <ShoppingBag className="w-6 h-6 text-white" />
+                </div>
+                <Badge className="bg-[#E07A5F]/20 text-[#E07A5F] border border-[#E07A5F]/30">
+                  Nouveautés
+                </Badge>
+              </div>
+              <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#2D2416] mb-4">
+                Boutique Exclusive
+              </h2>
+              <p className="text-[#3D2914]/70 max-w-xl">
+                Des patrons premium et kits complets créés par nos artisans d'exception
+              </p>
+            </div>
+            <Button 
+              size="lg"
+              className="mt-6 md:mt-0 bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#1A1410] rounded-full px-8 hover:shadow-xl hover:shadow-[#D4AF37]/30"
+              onClick={() => onNavigate('boutique')}
+            >
+              Voir toute la boutique
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Products Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                id: 1,
+                title: "Patron Lapin Amigurumi",
+                price: 8.99,
+                image: "/images/projects/bunny.png",
+                creator: "Marie C.",
+                rating: 4.9,
+                reviews: 127,
+                category: "Patrons",
+                difficulty: "Intermédiaire",
+                featured: true
+              },
+              {
+                id: 2,
+                title: "Kit Complet Cardigan",
+                price: 45.00,
+                image: "/images/projects/cardigan.png",
+                creator: "Sophie L.",
+                rating: 4.8,
+                reviews: 89,
+                category: "Kits",
+                difficulty: "Avancé"
+              },
+              {
+                id: 3,
+                title: "Patron Sac Bohème",
+                price: 12.50,
+                image: "/images/projects/bag.png",
+                creator: "Claire D.",
+                rating: 4.7,
+                reviews: 64,
+                category: "Accessoires",
+                difficulty: "Débutant"
+              },
+              {
+                id: 4,
+                title: "Patron Couverture Granny",
+                price: 15.00,
+                image: "/images/projects/blanket.png",
+                creator: "Emma R.",
+                rating: 5.0,
+                reviews: 203,
+                category: "Maison",
+                difficulty: "Intermédiaire",
+                featured: true
+              }
+            ].map((product) => (
+              <div 
+                key={product.id}
+                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer border border-[#E8E5D8]"
+                onClick={() => onNavigate('boutique')}
+              >
+                <div className="relative aspect-square overflow-hidden">
+                  <img 
+                    src={product.image} 
+                    alt={product.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  {product.featured && (
+                    <div className="absolute top-3 left-3 bg-[#D4AF37] text-[#1A1410] text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> Vedette
+                    </div>
+                  )}
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-[#3D2914] text-xs font-medium px-3 py-1 rounded-full">
+                    {product.category}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2416]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Button 
+                      className="w-full bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-full"
+                      onClick={(e) => { e.stopPropagation(); onNavigate('boutique'); }}
+                    >
+                      <ShoppingCart className="w-4 h-4 mr-2" /> Voir le produit
+                    </Button>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      product.difficulty === 'Débutant' ? 'bg-[#81B29A]/20 text-[#81B29A]' :
+                      product.difficulty === 'Intermédiaire' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' :
+                      'bg-[#E07A5F]/20 text-[#E07A5F]'
+                    }`}>
+                      {product.difficulty}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-[#2D2416] mb-1 truncate group-hover:text-[#D4AF37] transition-colors">
+                    {product.title}
+                  </h3>
+                  <p className="text-sm text-[#81B29A] mb-3">par {product.creator}</p>
+                  <div className="flex items-center gap-1 mb-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-[#D4AF37] text-[#D4AF37]' : 'text-[#B8A88A]'}`} 
+                      />
+                    ))}
+                    <span className="text-sm text-[#3D2914]/70 ml-1">({product.reviews})</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-[#D4AF37]">{product.price.toFixed(2)}€</span>
+                    <Heart className="w-5 h-5 text-[#B8A88A] hover:text-[#E07A5F] cursor-pointer transition-colors hover:fill-[#E07A5F]" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trust Badges */}
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { icon: Truck, title: "Livraison digitale", desc: "Téléchargement immédiat" },
+              { icon: ShieldCheck, title: "Paiement sécurisé", desc: "Transactions cryptées" },
+              { icon: Award, title: "Qualité garantie", desc: "Satisfait ou remboursé" },
+              { icon: Users, title: "Support dédié", desc: "Assistance 7j/7" }
+            ].map((badge, index) => (
+              <div key={index} className="flex items-center gap-4 p-4 bg-white/50 rounded-xl border border-[#E8E5D8]">
+                <div className="w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center">
+                  <badge.icon className="w-6 h-6 text-[#D4AF37]" />
+                </div>
+                <div>
+                  <p className="font-semibold text-[#2D2416] text-sm">{badge.title}</p>
+                  <p className="text-xs text-[#3D2914]/60">{badge.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Premium Creators Section */}
       <section id="creators" className="py-24 bg-[#3D2914] relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
@@ -1279,6 +1610,17 @@ function LuxuryLandingPage({ onNavigate, products: externalProducts }: { onNavig
                 </Button>
               </div>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              size="lg"
+              className="rounded-full px-8 bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#1A1410] hover:shadow-xl hover:shadow-[#D4AF37]/30"
+              onClick={() => onNavigate('creators')}
+            >
+              Voir tous les créateurs
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
           </div>
         </div>
       </section>
@@ -1408,10 +1750,10 @@ function LuxuryLandingPage({ onNavigate, products: externalProducts }: { onNavig
             <div>
               <h4 className="font-semibold text-[#D4AF37] mb-4">Explorer</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Projets</a></li>
-                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Créateurs</a></li>
-                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Patrons</a></li>
-                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Tutoriels</a></li>
+                <li><button onClick={() => onNavigate('explorer')} className="text-white/60 hover:text-white transition-colors">Projets</button></li>
+                <li><button onClick={() => onNavigate('creators')} className="text-white/60 hover:text-white transition-colors">Créateurs</button></li>
+                <li><button onClick={() => onNavigate('boutique')} className="text-white/60 hover:text-white transition-colors">Boutique</button></li>
+                <li><button onClick={() => onNavigate('boutique')} className="text-white/60 hover:text-white transition-colors">Patrons</button></li>
               </ul>
             </div>
 
@@ -3675,6 +4017,1356 @@ function SubscribersPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
 }
 
 // ============================================
+// CREATORS PAGE - Tous les créateurs
+// ============================================
+
+function CreatorsPage({ onNavigate, onSelectCreator }: { onNavigate: (view: ViewType) => void; onSelectCreator: (creator: typeof creators[0]) => void }) {
+  const { theme } = useTheme()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all')
+
+  const specialties = ['all', 'Amigurumi', 'Vêtements', 'Maison', 'Bébé', 'Accessoires', 'Patrons']
+
+  const filteredCreators = creators.filter(creator => {
+    if (selectedSpecialty !== 'all' && creator.specialty !== selectedSpecialty) return false
+    if (searchQuery && !creator.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    return true
+  })
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[#D4AF37]/20">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => onNavigate('landing')} className="text-[#3D2914] dark:text-[#F5F0E8]">
+                <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Retour
+              </Button>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-[#3D2914] dark:text-[#F5F0E8]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Nos Créateurs
+                </h1>
+                <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Découvrez les talents de notre communauté</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => onNavigate('boutique')} className="border-[#D4AF37]/30 text-[#D4AF37] rounded-full">
+                <ShoppingBag className="w-5 h-5 mr-2" /> Boutique
+              </Button>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Filters */}
+      <div className="bg-[#F5F3E1] dark:bg-[#2D2416] border-b border-[#E8E5D8] dark:border-[#D4AF37]/20">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+              {specialties.map((spec) => (
+                <Button
+                  key={spec}
+                  variant={selectedSpecialty === spec ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedSpecialty(spec)}
+                  className={`rounded-full whitespace-nowrap ${
+                    selectedSpecialty === spec
+                      ? 'bg-[#D4AF37] text-[#1A1410] hover:bg-[#B8962F]'
+                      : 'border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10'
+                  }`}
+                >
+                  {spec === 'all' ? 'Tous' : spec}
+                </Button>
+              ))}
+            </div>
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8A88A]" />
+              <Input
+                placeholder="Rechercher un créateur..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 text-[#3D2914] dark:text-[#F5F0E8] rounded-full"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Creators Grid */}
+      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+        <p className="text-[#5C4330] dark:text-[#B8A88A] text-sm mb-6">
+          {filteredCreators.length} créateur{filteredCreators.length > 1 ? 's' : ''} trouvé{filteredCreators.length > 1 ? 's' : ''}
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCreators.map((creator) => (
+            <Card
+              key={creator.id}
+              className="group bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20 overflow-hidden hover:border-[#D4AF37]/40 transition-all shadow-sm hover:shadow-lg cursor-pointer"
+              onClick={() => onSelectCreator(creator)}
+            >
+              <div className="h-24 bg-gradient-to-r from-[#E07A5F]/80 via-[#D4AF37]/80 to-[#81B29A]/80" />
+              <CardContent className="p-6 -mt-12 relative">
+                <div className="flex items-end gap-4 mb-4">
+                  <Avatar className="w-20 h-20 border-4 border-[#F5F3E1] dark:border-[#2D2416] shadow-lg">
+                    <AvatarImage src={creator.avatar} alt={creator.name} />
+                    <AvatarFallback className="bg-[#D4AF37] text-[#1A1410] text-xl">{creator.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0 pb-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-[#3D2914] dark:text-[#F5F0E8] truncate">{creator.name}</h3>
+                      <Crown className="w-4 h-4 text-[#D4AF37] flex-shrink-0" />
+                    </div>
+                    <p className="text-sm text-[#81B29A]">{creator.specialty}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-[#5C4330] dark:text-[#B8A88A] mb-4 line-clamp-2">{creator.bio}</p>
+                <div className="flex items-center gap-4 text-sm text-[#5C4330] dark:text-[#B8A88A] mb-4">
+                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{creator.location}</span>
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-[#E8E5D8] dark:border-[#D4AF37]/20">
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="flex items-center gap-1 text-[#D4AF37] font-medium"><Users className="w-4 h-4" />{creator.followers}</span>
+                    <span className="flex items-center gap-1 text-[#81B29A]"><FolderOpen className="w-4 h-4" />{creator.projects}</span>
+                  </div>
+                  <Button size="sm" className="bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-full" onClick={(e) => { e.stopPropagation(); onSelectCreator(creator) }}>
+                    Voir le profil
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredCreators.length === 0 && (
+          <div className="text-center py-16">
+            <Users className="w-16 h-16 text-[#B8A88A]/40 mx-auto mb-4" />
+            <p className="text-[#5C4330] dark:text-[#B8A88A]">Aucun créateur trouvé</p>
+          </div>
+        )}
+      </main>
+
+      <footer className="bg-gradient-to-r from-[#3D2914] via-[#2D2416] to-[#3D2914] text-white py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+          <p className="text-white/60 text-sm">© 2024 Crochetti - Tous droits réservés</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+// ============================================
+// PUBLIC BOUTIQUE PAGE
+// ============================================
+
+function PublicBoutiquePage({ onNavigate, onSelectProduct }: { onNavigate: (view: ViewType) => void; onSelectProduct: (product: Product) => void }) {
+  const { theme } = useTheme()
+  const { products } = useProducts()
+  const { addToCart, totalItems } = useCart()
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'popular' | 'newest' | 'price-low' | 'price-high'>('popular')
+
+  const filteredProducts = products.filter(p => {
+    if (selectedCategory !== 'all' && p.category !== selectedCategory) return false
+    if (searchQuery && !p.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    return true
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low': return a.price - b.price
+      case 'price-high': return b.price - a.price
+      case 'newest': return (b.createdAt || '').localeCompare(a.createdAt || '')
+      default: return b.reviews - a.reviews
+    }
+  })
+
+  const categories = ['all', 'Patrons', 'Kits', 'Accessoires', 'Maison']
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[#D4AF37]/20">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => onNavigate('landing')} className="text-[#3D2914] dark:text-[#F5F0E8]">
+                <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Retour
+              </Button>
+              <div>
+                <h1 className="text-xl lg:text-2xl font-bold text-[#3D2914] dark:text-[#F5F0E8]" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  Boutique Crochetti
+                </h1>
+                <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Découvrez les créations de nos artisans</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => onNavigate('cart')} className="relative border-[#D4AF37]/30 text-[#D4AF37] rounded-full">
+                <ShoppingCart className="w-5 h-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#E07A5F] text-white text-xs rounded-full flex items-center justify-center">{totalItems}</span>
+                )}
+              </Button>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Filters */}
+      <div className="bg-[#F5F3E1] dark:bg-[#2D2416] border-b border-[#E8E5D8] dark:border-[#D4AF37]/20">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={selectedCategory === cat ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`rounded-full whitespace-nowrap ${selectedCategory === cat ? 'bg-[#D4AF37] text-[#1A1410] hover:bg-[#B8962F]' : 'border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10'}`}
+                >
+                  {cat === 'all' ? 'Tous' : cat}
+                </Button>
+              ))}
+            </div>
+            <div className="flex gap-3 w-full md:w-auto">
+              <div className="relative flex-1 md:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8A88A]" />
+                <Input placeholder="Rechercher..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 text-[#3D2914] dark:text-[#F5F0E8] rounded-full" />
+              </div>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="px-4 py-2 bg-[#FDFCF0] dark:bg-[#1A1410] border border-[#E8E5D8] dark:border-[#D4AF37]/20 rounded-full text-[#3D2914] dark:text-[#F5F0E8] text-sm">
+                <option value="popular">Popularité</option>
+                <option value="newest">Plus récents</option>
+                <option value="price-low">Prix croissant</option>
+                <option value="price-high">Prix décroissant</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+        <p className="text-[#5C4330] dark:text-[#B8A88A] text-sm mb-6">{filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} trouvé{filteredProducts.length > 1 ? 's' : ''}</p>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {filteredProducts.map((product) => (
+            <Card key={product.id} className="group bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20 overflow-hidden hover:border-[#D4AF37]/40 transition-all shadow-sm hover:shadow-lg cursor-pointer" onClick={() => onSelectProduct(product)}>
+              <div className="aspect-square relative overflow-hidden bg-[#E8E5D8]/30 dark:bg-[#1A1410]">
+                <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <Badge className="absolute top-3 left-3 bg-[#D4AF37]/90 text-[#1A1410]">{product.category}</Badge>
+                {product.stock !== undefined && product.stock < 20 && <div className="absolute top-3 right-3 bg-[#E07A5F] text-white text-xs px-2 py-1 rounded-full">Stock limité</div>}
+                {product.featured && <div className="absolute bottom-3 left-3 bg-[#D4AF37] text-[#1A1410] text-xs px-2 py-1 rounded-full flex items-center gap-1"><Sparkles className="w-3 h-3" /> Vedette</div>}
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-medium text-[#3D2914] dark:text-[#F5F0E8] text-sm mb-1 truncate">{product.title}</h3>
+                <p className="text-xs text-[#81B29A] mb-2">par {product.creator}</p>
+                <div className="flex items-center gap-1 mb-3">
+                  <Star className="w-4 h-4 fill-[#D4AF37] text-[#D4AF37]" />
+                  <span className="text-sm text-[#3D2914] dark:text-[#F5F0E8]">{product.rating}</span>
+                  <span className="text-xs text-[#5C4330] dark:text-[#B8A88A]">({product.reviews} avis)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-lg font-bold text-[#D4AF37]">{product.price.toFixed(2)}€</p>
+                  <Button size="sm" onClick={(e) => { e.stopPropagation(); addToCart(product) }} className="bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-full">
+                    <ShoppingCart className="w-4 h-4 mr-1" /> Ajouter
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-16">
+            <ShoppingBag className="w-16 h-16 text-[#B8A88A]/40 mx-auto mb-4" />
+            <p className="text-[#5C4330] dark:text-[#B8A88A]">Aucun produit trouvé</p>
+          </div>
+        )}
+      </main>
+
+      {/* Floating Cart Button */}
+      {totalItems > 0 && (
+        <button
+          onClick={() => onNavigate('cart')}
+          className="fixed bottom-6 right-6 z-50 bg-[#E07A5F] hover:bg-[#C96850] text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+        >
+          <ShoppingCart className="w-6 h-6" />
+          <span className="absolute -top-2 -right-2 w-6 h-6 bg-[#D4AF37] text-[#1A1410] text-sm font-bold rounded-full flex items-center justify-center">
+            {totalItems}
+          </span>
+          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-[#2D2416] text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Voir le panier
+          </span>
+        </button>
+      )}
+
+      <footer className="bg-gradient-to-r from-[#3D2914] via-[#2D2416] to-[#3D2914] text-white py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+          <p className="text-white/60 text-sm">© 2024 Crochetti - Tous droits réservés</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+// ============================================
+// PRODUCT DETAIL PAGE
+// ============================================
+
+function ProductDetailPage({ product, onNavigate, onSelectCreator }: { product: Product; onNavigate: (view: ViewType) => void; onSelectCreator: (creator: typeof creators[0]) => void }) {
+  const { addToCart, totalItems } = useCart()
+  const { products } = useProducts()
+  const [quantity, setQuantity] = useState(1)
+  const [activeTab, setActiveTab] = useState<'description' | 'details' | 'reviews'>('description')
+
+  const creatorInfo = creators.find(c => c.id === product.creatorId)
+  const relatedProducts = products.filter(p => p.id !== product.id && p.category === product.category).slice(0, 4)
+
+  const mockReviews = [
+    { id: 1, author: "Marie D.", avatar: "/images/creators/creator1.png", rating: 5, date: "15 Mars 2024", comment: "Patron très bien expliqué! J'ai réussi à le faire en un week-end." },
+    { id: 2, author: "Sophie L.", avatar: "/images/creators/creator2.png", rating: 5, date: "10 Mars 2024", comment: "Magnifique résultat! Le patron est facile à suivre." },
+  ]
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Débutant': return 'bg-[#81B29A]/20 text-[#81B29A] border-[#81B29A]/30'
+      case 'Intermédiaire': return 'bg-[#D4AF37]/20 text-[#D4AF37] border-[#D4AF37]/30'
+      case 'Avancé': return 'bg-[#E07A5F]/20 text-[#E07A5F] border-[#E07A5F]/30'
+      default: return 'bg-[#81B29A]/20 text-[#81B29A] border-[#81B29A]/30'
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[#D4AF37]/20 px-4 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Button variant="ghost" onClick={() => onNavigate('boutique')} className="text-[#3D2914] dark:text-[#F5F0E8]">
+            <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Retour à la boutique
+          </Button>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-[#5C4330] dark:text-[#B8A88A] mb-6">
+          <button onClick={() => onNavigate('landing')} className="hover:text-[#E07A5F]">Accueil</button>
+          <ChevronRight className="w-4 h-4" />
+          <button onClick={() => onNavigate('boutique')} className="hover:text-[#E07A5F]">Boutique</button>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-[#D4AF37]">{product.title}</span>
+        </nav>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          {/* Image */}
+          <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+            <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+            {product.featured && <Badge className="absolute top-4 left-4 bg-[#D4AF37] text-[#1A1410]"><Sparkles className="w-3 h-3 mr-1" /> Produit vedette</Badge>}
+            {product.stock !== undefined && product.stock < 20 && <div className="absolute top-4 right-4 bg-[#E07A5F] text-white text-xs px-3 py-1 rounded-full">Stock limité ({product.stock})</div>}
+          </div>
+
+          {/* Info */}
+          <div className="space-y-6">
+            <div>
+              <Badge className="mb-3 bg-[#81B29A]/20 text-[#81B29A] border border-[#81B29A]/30">{product.category}</Badge>
+              <h1 className="text-2xl lg:text-3xl font-bold text-[#3D2914] dark:text-[#F5F0E8] mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>{product.title}</h1>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => <Star key={i} className={`w-5 h-5 ${i < Math.floor(product.rating) ? 'fill-[#D4AF37] text-[#D4AF37]' : 'text-[#B8A88A]'}`} />)}
+                </div>
+                <span className="text-[#3D2914] dark:text-[#F5F0E8] font-medium">{product.rating}</span>
+                <span className="text-[#5C4330] dark:text-[#B8A88A]">({product.reviews} avis)</span>
+              </div>
+            </div>
+
+            {/* Creator */}
+            {creatorInfo && (
+              <div className="flex items-center gap-3 p-3 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20 cursor-pointer hover:border-[#D4AF37]/40" onClick={() => onSelectCreator(creatorInfo)}>
+                <Avatar className="w-12 h-12 border-2 border-[#D4AF37]"><AvatarImage src={product.creatorAvatar || creatorInfo.avatar} /><AvatarFallback>{product.creator[0]}</AvatarFallback></Avatar>
+                <div className="flex-1">
+                  <p className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">{product.creator}</p>
+                  <p className="text-sm text-[#81B29A]">{creatorInfo.specialty} • {creatorInfo.followers} abonnés</p>
+                </div>
+                <Button variant="outline" size="sm" className="border-[#D4AF37]/30 text-[#D4AF37]">Voir</Button>
+              </div>
+            )}
+
+            {/* Price */}
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl lg:text-4xl font-bold text-[#D4AF37]">{product.price.toFixed(2)}€</span>
+              {product.pages && <span className="text-[#5C4330] dark:text-[#B8A88A]">• {product.pages} pages</span>}
+            </div>
+
+            {/* Quick Info */}
+            <div className="grid grid-cols-3 gap-3">
+              {product.difficulty && <div className="text-center p-3 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20"><p className="text-xs text-[#5C4330] dark:text-[#B8A88A] mb-1">Difficulté</p><Badge className={getDifficultyColor(product.difficulty)}>{product.difficulty}</Badge></div>}
+              {product.timeToComplete && <div className="text-center p-3 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20"><p className="text-xs text-[#5C4330] dark:text-[#B8A88A] mb-1">Durée</p><p className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">{product.timeToComplete}</p></div>}
+              {product.language && <div className="text-center p-3 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20"><p className="text-xs text-[#5C4330] dark:text-[#B8A88A] mb-1">Langue</p><p className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">{product.language}</p></div>}
+            </div>
+
+            {/* Quantity & Cart */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center border border-[#E8E5D8] dark:border-[#D4AF37]/20 rounded-lg">
+                <Button variant="ghost" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} className="text-[#3D2914] dark:text-[#F5F0E8]"><Minus className="w-4 h-4" /></Button>
+                <span className="w-12 text-center text-[#3D2914] dark:text-[#F5F0E8]">{quantity}</span>
+                <Button variant="ghost" size="icon" onClick={() => setQuantity(quantity + 1)} className="text-[#3D2914] dark:text-[#F5F0E8]"><Plus className="w-4 h-4" /></Button>
+              </div>
+              <Button className="flex-1 bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-xl py-6 text-lg" onClick={() => { for (let i = 0; i < quantity; i++) addToCart(product) }}>
+                <ShoppingCart className="w-5 h-5 mr-2" /> Ajouter au panier
+              </Button>
+            </div>
+
+            {/* Materials */}
+            {product.materials && product.materials.length > 0 && (
+              <div className="p-4 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+                <h3 className="font-medium text-[#3D2914] dark:text-[#F5F0E8] mb-2 flex items-center gap-2"><Package className="w-4 h-4 text-[#D4AF37]" /> Matériel nécessaire</h3>
+                <ul className="grid grid-cols-2 gap-2">
+                  {product.materials.map((material, index) => <li key={index} className="flex items-center gap-2 text-sm text-[#5C4330] dark:text-[#B8A88A]"><Check className="w-3 h-3 text-[#81B29A]" />{material}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="mt-12">
+          <div className="flex border-b border-[#E8E5D8] dark:border-[#D4AF37]/20">
+            {(['description', 'details', 'reviews'] as const).map((tab) => (
+              <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-3 font-medium transition-colors ${activeTab === tab ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-[#5C4330] dark:text-[#B8A88A] hover:text-[#E07A5F]'}`}>
+                {tab === 'reviews' ? `Avis (${product.reviews})` : tab === 'details' ? 'Détails' : 'Description'}
+              </button>
+            ))}
+          </div>
+          <div className="py-6">
+            {activeTab === 'description' && <p className="text-[#5C4330] dark:text-[#B8A88A] leading-relaxed text-lg">{product.description}</p>}
+            {activeTab === 'details' && product.details && (
+              <div className="space-y-4">
+                {product.details.map((detail, index) => (
+                  <div key={index} className="flex items-start gap-3 p-4 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+                    <CheckCircle className="w-5 h-5 text-[#81B29A] mt-0.5" />
+                    <span className="text-[#3D2914] dark:text-[#F5F0E8]">{detail}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'reviews' && (
+              <div className="space-y-6">
+                {mockReviews.map((review) => (
+                  <div key={review.id} className="p-6 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar><AvatarImage src={review.avatar} /><AvatarFallback>{review.author[0]}</AvatarFallback></Avatar>
+                        <div>
+                          <p className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">{review.author}</p>
+                          <div className="flex items-center gap-1">
+                            {[...Array(5)].map((_, i) => <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-[#D4AF37] text-[#D4AF37]' : 'text-[#B8A88A]'}`} />)}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-sm text-[#5C4330] dark:text-[#B8A88A]">{review.date}</span>
+                    </div>
+                    <p className="text-[#5C4330] dark:text-[#B8A88A]">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-xl font-bold text-[#3D2914] dark:text-[#F5F0E8] mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Produits similaires</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {relatedProducts.map((p) => (
+                <Card key={p.id} className="group bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20 overflow-hidden hover:border-[#D4AF37]/40 cursor-pointer" onClick={() => onSelectProduct(p)}>
+                  <div className="aspect-square relative overflow-hidden bg-[#E8E5D8]/30 dark:bg-[#1A1410]">
+                    <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <Badge className="absolute top-2 left-2 bg-[#D4AF37]/90 text-[#1A1410] text-xs">{p.category}</Badge>
+                  </div>
+                  <CardContent className="p-3">
+                    <h3 className="font-medium text-[#3D2914] dark:text-[#F5F0E8] text-sm truncate">{p.title}</h3>
+                    <p className="text-xs text-[#81B29A] mb-2">par {p.creator}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-[#D4AF37]">{p.price.toFixed(2)}€</p>
+                      <div className="flex items-center gap-1"><Star className="w-3 h-3 fill-[#D4AF37] text-[#D4AF37]" /><span className="text-xs text-[#3D2914] dark:text-[#F5F0E8]">{p.rating}</span></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer className="bg-gradient-to-r from-[#3D2914] via-[#2D2416] to-[#3D2914] text-white py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+          <p className="text-white/60 text-sm">© 2024 Crochetti - Tous droits réservés</p>
+        </div>
+      </footer>
+
+      {/* Floating Cart Button */}
+      {totalItems > 0 && (
+        <button
+          onClick={() => onNavigate('cart')}
+          className="fixed bottom-6 right-6 z-50 bg-[#E07A5F] hover:bg-[#C96850] text-white p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+        >
+          <ShoppingCart className="w-6 h-6" />
+          <span className="absolute -top-2 -right-2 w-6 h-6 bg-[#D4AF37] text-[#1A1410] text-sm font-bold rounded-full flex items-center justify-center">
+            {totalItems}
+          </span>
+          <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-[#2D2416] text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            Voir le panier
+          </span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ============================================
+// CART PAGE
+// ============================================
+
+function CartPage({ onNavigate }: { onNavigate: (view: ViewType) => void }) {
+  const { items, removeFromCart, updateQuantity, totalItems, totalPrice, clearCart } = useCart()
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[#D4AF37]/20 px-4 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Button variant="ghost" onClick={() => onNavigate('boutique')} className="text-[#3D2914] dark:text-[#F5F0E8]">
+            <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Continuer les achats
+          </Button>
+          <h1 className="text-xl font-bold text-[#3D2914] dark:text-[#F5F0E8]" style={{ fontFamily: 'Playfair Display, serif' }}>Mon Panier</h1>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 lg:px-8 py-8">
+        {items.length === 0 ? (
+          <div className="text-center py-16">
+            <ShoppingCart className="w-16 h-16 text-[#B8A88A]/40 mx-auto mb-4" />
+            <h2 className="text-xl font-medium text-[#3D2914] dark:text-[#F5F0E8] mb-2">Votre panier est vide</h2>
+            <p className="text-[#5C4330] dark:text-[#B8A88A] mb-6">Découvrez nos créations et ajoutez-les à votre panier</p>
+            <Button onClick={() => onNavigate('boutique')} className="bg-[#D4AF37] hover:bg-[#B8962F] text-[#1A1410] rounded-full">Parcourir la boutique</Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Items */}
+            <div className="lg:col-span-2 space-y-4">
+              {items.map((item) => (
+                <Card key={item.id} className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+                  <CardContent className="p-4 flex gap-4">
+                    <img src={item.image} alt={item.title} className="w-24 h-24 rounded-lg object-cover" />
+                    <div className="flex-1">
+                      <h3 className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">{item.title}</h3>
+                      <p className="text-sm text-[#81B29A]">par {item.creator}</p>
+                      <p className="text-lg font-bold text-[#D4AF37] mt-1">{item.price.toFixed(2)}€</p>
+                    </div>
+                    <div className="flex flex-col items-end justify-between">
+                      <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)} className="text-[#C96850] hover:bg-[#C96850]/10"><Trash2 className="w-4 h-4" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 border-[#D4AF37]/30"><Minus className="w-3 h-3" /></Button>
+                        <span className="w-8 text-center text-[#3D2914] dark:text-[#F5F0E8]">{item.quantity}</span>
+                        <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 border-[#D4AF37]/30"><Plus className="w-3 h-3" /></Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Button variant="ghost" onClick={clearCart} className="text-[#C96850] hover:bg-[#C96850]/10">Vider le panier</Button>
+            </div>
+
+            {/* Summary */}
+            <div className="lg:col-span-1">
+              <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20 sticky top-24">
+                <CardContent className="p-6 space-y-4">
+                  <h2 className="text-lg font-bold text-[#3D2914] dark:text-[#F5F0E8]">Résumé</h2>
+                  <div className="flex justify-between text-[#5C4330] dark:text-[#B8A88A]">
+                    <span>{totalItems} article{totalItems > 1 ? 's' : ''}</span>
+                    <span>{totalPrice.toFixed(2)}€</span>
+                  </div>
+                  <div className="flex justify-between text-[#5C4330] dark:text-[#B8A88A]">
+                    <span>Livraison</span>
+                    <span className="text-[#81B29A]">Gratuite</span>
+                  </div>
+                  <Separator className="bg-[#D4AF37]/20" />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span className="text-[#3D2914] dark:text-[#F5F0E8]">Total</span>
+                    <span className="text-[#D4AF37]">{totalPrice.toFixed(2)}€</span>
+                  </div>
+                  <Button onClick={() => onNavigate('checkout')} className="w-full bg-[#D4AF37] hover:bg-[#B8962F] text-[#1A1410] rounded-xl py-6">
+                    Passer la commande
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// CHECKOUT PAGE - Page de commande complète
+// ============================================
+
+function CheckoutPage({ onNavigate }: { onNavigate: (view: ViewType) => void }) {
+  const { items, totalPrice, clearCart } = useCart()
+  const [step, setStep] = useState<'info' | 'payment' | 'success'>('info')
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'orange' | 'wave'>('card')
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [orderNumber, setOrderNumber] = useState('')
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: 'Sénégal',
+    notes: ''
+  })
+  
+  // Payment form state
+  const [paymentData, setPaymentData] = useState({
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvv: '',
+    cardName: '',
+    orangeNumber: '',
+    waveNumber: ''
+  })
+  
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const updateFormData = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
+
+  const updatePaymentData = (field: string, value: string) => {
+    setPaymentData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
+
+  const validateInfoForm = () => {
+    const newErrors: Record<string, string> = {}
+    if (!formData.firstName.trim()) newErrors.firstName = 'Prénom requis'
+    if (!formData.lastName.trim()) newErrors.lastName = 'Nom requis'
+    if (!formData.email.trim()) newErrors.email = 'Email requis'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Email invalide'
+    if (!formData.phone.trim()) newErrors.phone = 'Téléphone requis'
+    if (!formData.address.trim()) newErrors.address = 'Adresse requise'
+    if (!formData.city.trim()) newErrors.city = 'Ville requise'
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validatePaymentForm = () => {
+    const newErrors: Record<string, string> = {}
+    
+    if (paymentMethod === 'card') {
+      if (!paymentData.cardNumber.trim()) newErrors.cardNumber = 'Numéro de carte requis'
+      else if (!/^\d{16}$/.test(paymentData.cardNumber.replace(/\s/g, ''))) newErrors.cardNumber = 'Numéro invalide'
+      if (!paymentData.cardExpiry.trim()) newErrors.cardExpiry = 'Date requise'
+      if (!paymentData.cardCvv.trim()) newErrors.cardCvv = 'CVV requis'
+      if (!paymentData.cardName.trim()) newErrors.cardName = 'Nom requis'
+    } else if (paymentMethod === 'orange') {
+      if (!paymentData.orangeNumber.trim()) newErrors.orangeNumber = 'Numéro Orange requis'
+      else if (!/^(\+221|7)[0-9]{8}$/.test(paymentData.orangeNumber.replace(/\s/g, ''))) newErrors.orangeNumber = 'Numéro invalide'
+    } else if (paymentMethod === 'wave') {
+      if (!paymentData.waveNumber.trim()) newErrors.waveNumber = 'Numéro Wave requis'
+      else if (!/^(\+221|7)[0-9]{8}$/.test(paymentData.waveNumber.replace(/\s/g, ''))) newErrors.waveNumber = 'Numéro invalide'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleContinueToPayment = () => {
+    if (validateInfoForm()) {
+      setStep('payment')
+    }
+  }
+
+  const handlePlaceOrder = async () => {
+    if (!validatePaymentForm()) return
+    
+    setIsProcessing(true)
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    // Generate order number
+    const generatedOrderNumber = 'CRH-' + Date.now().toString(36).toUpperCase()
+    setOrderNumber(generatedOrderNumber)
+    setIsProcessing(false)
+    setStep('success')
+  }
+
+  // Redirect if cart is empty
+  if (items.length === 0 && step !== 'success') {
+    return (
+      <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410] flex items-center justify-center">
+        <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#D4AF37]/20 max-w-md w-full mx-4">
+          <CardContent className="p-8 text-center">
+            <ShoppingCart className="w-16 h-16 text-[#B8A88A]/40 mx-auto mb-4" />
+            <h2 className="text-xl font-medium text-[#3D2914] dark:text-[#F5F0E8] mb-2">Votre panier est vide</h2>
+            <p className="text-[#5C4330] dark:text-[#B8A88A] mb-6">Ajoutez des articles pour passer commande</p>
+            <Button onClick={() => onNavigate('boutique')} className="bg-[#D4AF37] hover:bg-[#B8962F] text-[#1A1410] rounded-full">Parcourir la boutique</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (step === 'success') {
+    return (
+      <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410] flex items-center justify-center p-4">
+        <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#D4AF37]/20 max-w-lg w-full">
+          <CardContent className="p-8">
+            {/* Success Animation */}
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-[#81B29A]/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <CheckCircle className="w-10 h-10 text-[#81B29A]" />
+              </div>
+              <h1 className="text-2xl font-bold text-[#3D2914] dark:text-[#F5F0E8] mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+                Commande confirmée !
+              </h1>
+              <p className="text-[#5C4330] dark:text-[#B8A88A]">Merci pour votre achat, {formData.firstName} !</p>
+            </div>
+            
+            {/* Order Details */}
+            <div className="bg-[#FDFCF0] dark:bg-[#1A1410] rounded-xl p-4 mb-6 border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Numéro de commande</span>
+                <span className="font-bold text-[#D4AF37]">{orderNumber}</span>
+              </div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Email de confirmation</span>
+                <span className="text-sm text-[#3D2914] dark:text-[#F5F0E8]">{formData.email}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Total payé</span>
+                <span className="font-bold text-[#D4AF37] text-lg">{totalPrice.toFixed(2)}€</span>
+              </div>
+            </div>
+            
+            {/* Items Summary */}
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-[#3D2914] dark:text-[#F5F0E8] mb-2">Articles commandés :</h3>
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span className="text-[#5C4330] dark:text-[#B8A88A]">{item.title} x{item.quantity}</span>
+                    <span className="text-[#3D2914] dark:text-[#F5F0E8]">{(item.price * item.quantity).toFixed(2)}€</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Actions */}
+            <div className="space-y-3">
+              <Button 
+                onClick={() => { clearCart(); onNavigate('boutique') }} 
+                className="w-full bg-[#D4AF37] hover:bg-[#B8962F] text-[#1A1410] rounded-xl py-6"
+              >
+                <ShoppingBag className="w-5 h-5 mr-2" /> Continuer mes achats
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => onNavigate('dashboard')} 
+                className="w-full border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 rounded-xl"
+              >
+                Voir mes commandes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[#D4AF37]/20 px-4 lg:px-8 py-4">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <Button variant="ghost" onClick={() => step === 'payment' ? setStep('info') : onNavigate('cart')} className="text-[#3D2914] dark:text-[#F5F0E8]">
+            <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Retour
+          </Button>
+          <div className="flex items-center gap-2">
+            <Lock className="w-4 h-4 text-[#81B29A]" />
+            <span className="text-sm text-[#81B29A]">Paiement sécurisé</span>
+          </div>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 lg:px-8 py-8">
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <div className={`flex items-center gap-2 ${step === 'info' ? 'text-[#D4AF37]' : 'text-[#81B29A]'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${step === 'info' ? 'bg-[#D4AF37] text-[#1A1410]' : 'bg-[#81B29A] text-white'}`}>
+              {step === 'payment' ? <Check className="w-5 h-5" /> : '1'}
+            </div>
+            <span className="hidden sm:inline font-medium">Informations</span>
+          </div>
+          <div className="w-16 h-1 bg-[#D4AF37]/30 rounded">
+            <div className={`h-full bg-[#D4AF37] rounded transition-all ${step === 'payment' ? 'w-full' : 'w-0'}`} />
+          </div>
+          <div className={`flex items-center gap-2 ${step === 'payment' ? 'text-[#D4AF37]' : 'text-[#B8A88A]'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${step === 'payment' ? 'bg-[#D4AF37] text-[#1A1410]' : 'bg-[#D4AF37]/20 text-[#D4AF37]'}`}>2</div>
+            <span className="hidden sm:inline font-medium">Paiement</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Form Section */}
+          <div className="lg:col-span-3">
+            {step === 'info' && (
+              <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#D4AF37]/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <User className="w-5 h-5 text-[#D4AF37]" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-[#3D2914] dark:text-[#F5F0E8]">Informations de livraison</h2>
+                      <p className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Vos coordonnées pour recevoir votre commande</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {/* Name */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Prénom *</Label>
+                        <Input 
+                          value={formData.firstName}
+                          onChange={(e) => updateFormData('firstName', e.target.value)}
+                          placeholder="Votre prénom"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.firstName ? 'border-red-500' : ''}`}
+                        />
+                        {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                      </div>
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Nom *</Label>
+                        <Input 
+                          value={formData.lastName}
+                          onChange={(e) => updateFormData('lastName', e.target.value)}
+                          placeholder="Votre nom"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.lastName ? 'border-red-500' : ''}`}
+                        />
+                        {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+                      </div>
+                    </div>
+                    
+                    {/* Contact */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Email *</Label>
+                        <Input 
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => updateFormData('email', e.target.value)}
+                          placeholder="votre@email.com"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.email ? 'border-red-500' : ''}`}
+                        />
+                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                      </div>
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Téléphone *</Label>
+                        <Input 
+                          value={formData.phone}
+                          onChange={(e) => updateFormData('phone', e.target.value)}
+                          placeholder="+221 77 123 45 67"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.phone ? 'border-red-500' : ''}`}
+                        />
+                        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                      </div>
+                    </div>
+                    
+                    {/* Address */}
+                    <div>
+                      <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Adresse *</Label>
+                      <Input 
+                        value={formData.address}
+                        onChange={(e) => updateFormData('address', e.target.value)}
+                        placeholder="Rue, numéro, quartier"
+                        className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.address ? 'border-red-500' : ''}`}
+                      />
+                      {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+                    </div>
+                    
+                    {/* City & Postal */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Ville *</Label>
+                        <Input 
+                          value={formData.city}
+                          onChange={(e) => updateFormData('city', e.target.value)}
+                          placeholder="Dakar"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.city ? 'border-red-500' : ''}`}
+                        />
+                        {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                      </div>
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Code postal</Label>
+                        <Input 
+                          value={formData.postalCode}
+                          onChange={(e) => updateFormData('postalCode', e.target.value)}
+                          placeholder="10000"
+                          className="bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Country */}
+                    <div>
+                      <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Pays</Label>
+                      <select 
+                        value={formData.country}
+                        onChange={(e) => updateFormData('country', e.target.value)}
+                        className="w-full px-3 py-2 bg-[#FDFCF0] dark:bg-[#1A1410] border border-[#E8E5D8] dark:border-[#D4AF37]/20 rounded-lg text-[#3D2914] dark:text-[#F5F0E8]"
+                      >
+                        <option value="Sénégal">Sénégal</option>
+                        <option value="France">France</option>
+                        <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                        <option value="Mali">Mali</option>
+                        <option value="Burkina Faso">Burkina Faso</option>
+                        <option value="Maroc">Maroc</option>
+                        <option value="Tunisie">Tunisie</option>
+                        <option value="Belgique">Belgique</option>
+                        <option value="Suisse">Suisse</option>
+                        <option value="Canada">Canada</option>
+                      </select>
+                    </div>
+                    
+                    {/* Notes */}
+                    <div>
+                      <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Notes (optionnel)</Label>
+                      <textarea 
+                        value={formData.notes}
+                        onChange={(e) => updateFormData('notes', e.target.value)}
+                        placeholder="Instructions spéciales pour la livraison..."
+                        rows={3}
+                        className="w-full px-3 py-2 bg-[#FDFCF0] dark:bg-[#1A1410] border border-[#E8E5D8] dark:border-[#D4AF37]/20 rounded-lg text-[#3D2914] dark:text-[#F5F0E8] resize-none"
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleContinueToPayment} 
+                      className="w-full bg-[#D4AF37] hover:bg-[#B8962F] text-[#1A1410] rounded-xl py-6 text-lg font-semibold mt-4"
+                    >
+                      Continuer vers le paiement
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {step === 'payment' && (
+              <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#D4AF37]/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center">
+                      <CreditCard className="w-5 h-5 text-[#D4AF37]" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-[#3D2914] dark:text-[#F5F0E8]">Mode de paiement</h2>
+                      <p className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Choisissez votre méthode de paiement</p>
+                    </div>
+                  </div>
+                  
+                  {/* Payment Methods */}
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    <button
+                      onClick={() => setPaymentMethod('card')}
+                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        paymentMethod === 'card' 
+                          ? 'border-[#D4AF37] bg-[#D4AF37]/10' 
+                          : 'border-[#E8E5D8] dark:border-[#D4AF37]/20 hover:border-[#D4AF37]/50'
+                      }`}
+                    >
+                      <CreditCard className={`w-8 h-8 ${paymentMethod === 'card' ? 'text-[#D4AF37]' : 'text-[#B8A88A]'}`} />
+                      <span className={`text-sm font-medium ${paymentMethod === 'card' ? 'text-[#D4AF37]' : 'text-[#5C4330] dark:text-[#B8A88A]'}`}>Carte</span>
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod('orange')}
+                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        paymentMethod === 'orange' 
+                          ? 'border-[#FF6600] bg-[#FF6600]/10' 
+                          : 'border-[#E8E5D8] dark:border-[#D4AF37]/20 hover:border-[#FF6600]/50'
+                      }`}
+                    >
+                      <Smartphone className={`w-8 h-8 ${paymentMethod === 'orange' ? 'text-[#FF6600]' : 'text-[#B8A88A]'}`} />
+                      <span className={`text-sm font-medium ${paymentMethod === 'orange' ? 'text-[#FF6600]' : 'text-[#5C4330] dark:text-[#B8A88A]'}`}>Orange</span>
+                    </button>
+                    <button
+                      onClick={() => setPaymentMethod('wave')}
+                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        paymentMethod === 'wave' 
+                          ? 'border-[#1DC8F2] bg-[#1DC8F2]/10' 
+                          : 'border-[#E8E5D8] dark:border-[#D4AF37]/20 hover:border-[#1DC8F2]/50'
+                      }`}
+                    >
+                      <Smartphone className={`w-8 h-8 ${paymentMethod === 'wave' ? 'text-[#1DC8F2]' : 'text-[#B8A88A]'}`} />
+                      <span className={`text-sm font-medium ${paymentMethod === 'wave' ? 'text-[#1DC8F2]' : 'text-[#5C4330] dark:text-[#B8A88A]'}`}>Wave</span>
+                    </button>
+                  </div>
+                  
+                  {/* Card Form */}
+                  {paymentMethod === 'card' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Numéro de carte *</Label>
+                        <Input 
+                          value={paymentData.cardNumber}
+                          onChange={(e) => updatePaymentData('cardNumber', e.target.value)}
+                          placeholder="1234 5678 9012 3456"
+                          maxLength={19}
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.cardNumber ? 'border-red-500' : ''}`}
+                        />
+                        {errors.cardNumber && <p className="text-red-500 text-xs mt-1">{errors.cardNumber}</p>}
+                      </div>
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Nom sur la carte *</Label>
+                        <Input 
+                          value={paymentData.cardName}
+                          onChange={(e) => updatePaymentData('cardName', e.target.value)}
+                          placeholder="JEAN DUPONT"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.cardName ? 'border-red-500' : ''}`}
+                        />
+                        {errors.cardName && <p className="text-red-500 text-xs mt-1">{errors.cardName}</p>}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Date d'expiration *</Label>
+                          <Input 
+                            value={paymentData.cardExpiry}
+                            onChange={(e) => updatePaymentData('cardExpiry', e.target.value)}
+                            placeholder="MM/AA"
+                            maxLength={5}
+                            className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.cardExpiry ? 'border-red-500' : ''}`}
+                          />
+                          {errors.cardExpiry && <p className="text-red-500 text-xs mt-1">{errors.cardExpiry}</p>}
+                        </div>
+                        <div>
+                          <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">CVV *</Label>
+                          <Input 
+                            value={paymentData.cardCvv}
+                            onChange={(e) => updatePaymentData('cardCvv', e.target.value)}
+                            placeholder="123"
+                            maxLength={4}
+                            type="password"
+                            className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.cardCvv ? 'border-red-500' : ''}`}
+                          />
+                          {errors.cardCvv && <p className="text-red-500 text-xs mt-1">{errors.cardCvv}</p>}
+                        </div>
+                      </div>
+                      
+                      {/* Accepted Cards */}
+                      <div className="flex items-center gap-4 pt-2">
+                        <span className="text-xs text-[#B8A88A]">Cartes acceptées:</span>
+                        <div className="flex gap-2">
+                          <div className="px-2 py-1 bg-blue-600 text-white text-xs rounded">VISA</div>
+                          <div className="px-2 py-1 bg-red-600 text-white text-xs rounded">Mastercard</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Orange Money Form */}
+                  {paymentMethod === 'orange' && (
+                    <div className="space-y-4">
+                      <div className="bg-[#FF6600]/10 border border-[#FF6600]/30 rounded-xl p-4 flex items-start gap-3">
+                        <Smartphone className="w-6 h-6 text-[#FF6600] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">Paiement Orange Money</p>
+                          <p className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Vous recevrez une demande de paiement sur votre téléphone</p>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Numéro Orange Money *</Label>
+                        <Input 
+                          value={paymentData.orangeNumber}
+                          onChange={(e) => updatePaymentData('orangeNumber', e.target.value)}
+                          placeholder="77 123 45 67"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.orangeNumber ? 'border-red-500' : ''}`}
+                        />
+                        {errors.orangeNumber && <p className="text-red-500 text-xs mt-1">{errors.orangeNumber}</p>}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Wave Form */}
+                  {paymentMethod === 'wave' && (
+                    <div className="space-y-4">
+                      <div className="bg-[#1DC8F2]/10 border border-[#1DC8F2]/30 rounded-xl p-4 flex items-start gap-3">
+                        <Smartphone className="w-6 h-6 text-[#1DC8F2] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-[#3D2914] dark:text-[#F5F0E8]">Paiement Wave</p>
+                          <p className="text-sm text-[#5C4330] dark:text-[#B8A88A]">Vous recevrez une demande de paiement Wave</p>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-[#5C4330] dark:text-[#B8A88A] mb-1 block">Numéro Wave *</Label>
+                        <Input 
+                          value={paymentData.waveNumber}
+                          onChange={(e) => updatePaymentData('waveNumber', e.target.value)}
+                          placeholder="77 123 45 67"
+                          className={`bg-[#FDFCF0] dark:bg-[#1A1410] border-[#E8E5D8] dark:border-[#D4AF37]/20 ${errors.waveNumber ? 'border-red-500' : ''}`}
+                        />
+                        {errors.waveNumber && <p className="text-red-500 text-xs mt-1">{errors.waveNumber}</p>}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Button 
+                    onClick={handlePlaceOrder} 
+                    disabled={isProcessing}
+                    className="w-full bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-xl py-6 text-lg font-semibold mt-6 disabled:opacity-50"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Traitement en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5 mr-2" />
+                        Payer {totalPrice.toFixed(2)}€
+                      </>
+                    )}
+                  </Button>
+                  
+                  {/* Security Note */}
+                  <div className="flex items-center justify-center gap-2 mt-4 text-xs text-[#B8A88A]">
+                    <Shield className="w-4 h-4" />
+                    <span>Paiement 100% sécurisé • Vos données sont protégées</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Order Summary Sidebar */}
+          <div className="lg:col-span-2">
+            <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#D4AF37]/20 sticky top-24">
+              <CardContent className="p-6">
+                <h2 className="text-lg font-bold text-[#3D2914] dark:text-[#F5F0E8] mb-4 flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-[#D4AF37]" />
+                  Votre commande
+                </h2>
+                
+                {/* Items */}
+                <div className="space-y-3 mb-4">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex gap-3">
+                      <img src={item.image} alt={item.title} className="w-16 h-16 rounded-lg object-cover" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-[#3D2914] dark:text-[#F5F0E8] text-sm truncate">{item.title}</p>
+                        <p className="text-xs text-[#81B29A]">par {item.creator}</p>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-[#B8A88A]">Qté: {item.quantity}</span>
+                          <span className="text-sm font-bold text-[#D4AF37]">{(item.price * item.quantity).toFixed(2)}€</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <Separator className="bg-[#D4AF37]/20 my-4" />
+                
+                {/* Summary */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between text-[#5C4330] dark:text-[#B8A88A]">
+                    <span>Sous-total</span>
+                    <span>{totalPrice.toFixed(2)}€</span>
+                  </div>
+                  <div className="flex justify-between text-[#5C4330] dark:text-[#B8A88A]">
+                    <span>Livraison</span>
+                    <span className="text-[#81B29A]">Gratuite</span>
+                  </div>
+                  <div className="flex justify-between text-[#5C4330] dark:text-[#B8A88A]">
+                    <span>TVA</span>
+                    <span>Incluse</span>
+                  </div>
+                </div>
+                
+                <Separator className="bg-[#D4AF37]/20 my-4" />
+                
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-[#3D2914] dark:text-[#F5F0E8]">Total</span>
+                  <span className="text-2xl font-bold text-[#D4AF37]">{totalPrice.toFixed(2)}€</span>
+                </div>
+                
+                {/* Delivery Info */}
+                {step === 'payment' && formData.firstName && (
+                  <div className="mt-6 p-3 bg-[#FDFCF0] dark:bg-[#1A1410] rounded-lg border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+                    <p className="text-xs text-[#B8A88A] mb-1">Livraison à:</p>
+                    <p className="text-sm text-[#3D2914] dark:text-[#F5F0E8] font-medium">{formData.firstName} {formData.lastName}</p>
+                    <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">{formData.address}, {formData.city}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// CREATOR PROFILE PAGE
+// ============================================
+
+function CreatorProfilePage({ creator, onNavigate }: { creator: typeof creators[0]; onNavigate: (view: ViewType) => void }) {
+  const { products } = useProducts()
+  const { addToCart } = useCart()
+  const creatorProducts = products.filter(p => p.creatorId === creator.id || p.creator.includes(creator.name.split(' ')[0]))
+
+  return (
+    <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[#D4AF37]/20 px-4 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex items-center gap-4">
+          <Button variant="ghost" onClick={() => onNavigate('creators')} className="text-[#3D2914] dark:text-[#F5F0E8]">
+            <ArrowRight className="w-4 h-4 mr-2 rotate-180" /> Retour
+          </Button>
+          <span className="text-[#B8A88A]">|</span>
+          <span className="text-[#D4AF37] font-medium">Profil Créateur</span>
+        </div>
+      </header>
+
+      {/* Cover & Profile */}
+      <div className="relative">
+        <div className="h-48 md:h-64 bg-gradient-to-r from-[#E07A5F] via-[#D4AF37] to-[#81B29A]" />
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+          <div className="relative -mt-20 md:-mt-24 flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
+            <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-[#FDFCF0] dark:border-[#1A1410] shadow-xl">
+              <AvatarImage src={creator.avatar} alt={creator.name} />
+              <AvatarFallback className="bg-[#D4AF37] text-[#1A1410] text-3xl">{creator.name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 pb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-[#3D2914] dark:text-[#F5F0E8]" style={{ fontFamily: 'Playfair Display, serif' }}>{creator.name}</h1>
+                <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30"><Crown className="w-3 h-3 mr-1" /> Créateur Vérifié</Badge>
+              </div>
+              <p className="text-[#81B29A] font-medium mb-2">{creator.specialty}</p>
+              <div className="flex items-center gap-4 text-[#5C4330] dark:text-[#B8A88A] text-sm">
+                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {creator.location}</span>
+                <span className="flex items-center gap-1"><Users className="w-4 h-4" /> {creator.followers} abonnés</span>
+                <span className="flex items-center gap-1"><FolderOpen className="w-4 h-4" /> {creator.projects} projets</span>
+              </div>
+            </div>
+            <div className="flex gap-2 pb-4">
+              <Button className="bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-full"><UserPlus className="w-4 h-4 mr-2" /> Suivre</Button>
+              <Button variant="outline" className="border-[#D4AF37]/30 text-[#D4AF37] rounded-full"><MessageSquare className="w-4 h-4 mr-2" /> Message</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-[#3D2914] dark:text-[#F5F0E8] mb-3">À propos</h3>
+                <p className="text-[#5C4330] dark:text-[#B8A88A] leading-relaxed">{creator.bio}</p>
+                <div className="mt-4 flex gap-2">
+                  <Button variant="outline" size="sm" className="border-[#E07A5F]/30 text-[#E07A5F]"><Instagram className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="sm" className="border-[#81B29A]/30 text-[#81B29A]"><Facebook className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="sm" className="border-[#D4AF37]/30 text-[#D4AF37]"><Globe className="w-4 h-4" /></Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-[#3D2914] dark:text-[#F5F0E8] mb-4">Statistiques</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-[#FDFCF0] dark:bg-[#1A1410] rounded-xl">
+                    <p className="text-2xl font-bold text-[#D4AF37]">{creator.projects}</p>
+                    <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Projets</p>
+                  </div>
+                  <div className="text-center p-3 bg-[#FDFCF0] dark:bg-[#1A1410] rounded-xl">
+                    <p className="text-2xl font-bold text-[#E07A5F]">{creator.followers}</p>
+                    <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Abonnés</p>
+                  </div>
+                  <div className="text-center p-3 bg-[#FDFCF0] dark:bg-[#1A1410] rounded-xl">
+                    <p className="text-2xl font-bold text-[#81B29A]">{creatorProducts.length}</p>
+                    <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Produits</p>
+                  </div>
+                  <div className="text-center p-3 bg-[#FDFCF0] dark:bg-[#1A1410] rounded-xl">
+                    <p className="text-2xl font-bold text-[#C96850]">4.9</p>
+                    <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Note</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Products */}
+          <div className="lg:col-span-2">
+            <h2 className="text-xl font-bold text-[#3D2914] dark:text-[#F5F0E8] mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Ses créations</h2>
+            {creatorProducts.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {creatorProducts.map((product) => (
+                  <Card key={product.id} className="group bg-[#F5F3E1] dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[#D4AF37]/20 overflow-hidden hover:border-[#D4AF37]/40 transition-all">
+                    <div className="aspect-square relative overflow-hidden bg-[#E8E5D8]/30 dark:bg-[#1A1410]">
+                      <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <Badge className="absolute top-2 left-2 bg-[#D4AF37]/90 text-[#1A1410] text-xs">{product.category}</Badge>
+                    </div>
+                    <CardContent className="p-3">
+                      <h3 className="font-medium text-[#3D2914] dark:text-[#F5F0E8] text-sm truncate">{product.title}</h3>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-sm font-bold text-[#D4AF37]">{product.price.toFixed(2)}€</p>
+                        <Button size="sm" onClick={() => addToCart(product)} className="bg-[#E07A5F] hover:bg-[#C96850] text-white rounded-full text-xs px-2"><ShoppingCart className="w-3 h-3 mr-1" /> Ajouter</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-[#F5F3E1] dark:bg-[#2D2416] rounded-xl border border-[#D4AF37]/20">
+                <Package className="w-16 h-16 text-[#B8A88A]/40 mx-auto mb-4" />
+                <p className="text-[#5C4330] dark:text-[#B8A88A]">Aucun produit disponible</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <footer className="bg-gradient-to-r from-[#3D2914] via-[#2D2416] to-[#3D2914] text-white py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 text-center">
+          <p className="text-white/60 text-sm">© 2024 Crochetti - Tous droits réservés</p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+// ============================================
 // MAIN APP COMPONENT
 // ============================================
 
@@ -3684,6 +5376,9 @@ export default function CrochettiApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [selectedCreator, setSelectedCreator] = useState<typeof creators[0] | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -3725,13 +5420,132 @@ export default function CrochettiApp() {
     setProducts(prev => prev.filter(p => p.id !== id))
   }
 
+  // Cart context functions
+  const addToCart = (product: Product) => {
+    setCartItems(prev => {
+      const existing = prev.find(item => item.id === product.id)
+      if (existing) {
+        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+      }
+      return [...prev, { id: product.id, title: product.title, image: product.image, price: product.price, creator: product.creator, quantity: 1 }]
+    })
+  }
+
+  const removeFromCart = (productId: number) => {
+    setCartItems(prev => prev.filter(item => item.id !== productId))
+  }
+
+  const updateQuantity = (productId: number, quantity: number) => {
+    setCartItems(prev => prev.map(item => item.id === productId ? { ...item, quantity } : item))
+  }
+
+  const clearCart = () => setCartItems([])
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  const cartContextValue = { items: cartItems, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }
+
   // Landing page is rendered standalone without sidebar
   if (view === 'landing') {
     return (
       <ThemeContext.Provider value={{ theme, toggleTheme }}>
         <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
-          <LuxuryLandingPage onNavigate={setView} products={products} />
-          <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+          <CartContext.Provider value={cartContextValue}>
+            <LuxuryLandingPage onNavigate={setView} products={products} />
+            <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+          </CartContext.Provider>
+        </ProductsContext.Provider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  // Creators page
+  if (view === 'creators') {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+          <CartContext.Provider value={cartContextValue}>
+            <CreatorsPage
+              onNavigate={setView}
+              onSelectCreator={(creator) => { setSelectedCreator(creator); setView('creator-profile') }}
+            />
+            <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+          </CartContext.Provider>
+        </ProductsContext.Provider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  // Boutique page
+  if (view === 'boutique') {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+          <CartContext.Provider value={cartContextValue}>
+            <PublicBoutiquePage
+              onNavigate={setView}
+              onSelectProduct={(product) => { setSelectedProduct(product); setView('product') }}
+            />
+            <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+          </CartContext.Provider>
+        </ProductsContext.Provider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  // Product detail page
+  if (view === 'product' && selectedProduct) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+          <CartContext.Provider value={cartContextValue}>
+            <ProductDetailPage
+              product={selectedProduct}
+              onNavigate={setView}
+              onSelectCreator={(creator) => { setSelectedCreator(creator); setView('creator-profile') }}
+            />
+            <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+          </CartContext.Provider>
+        </ProductsContext.Provider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  // Cart page
+  if (view === 'cart') {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+          <CartContext.Provider value={cartContextValue}>
+            <CartPage onNavigate={setView} />
+          </CartContext.Provider>
+        </ProductsContext.Provider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  // Checkout page
+  if (view === 'checkout') {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+          <CartContext.Provider value={cartContextValue}>
+            <CheckoutPage onNavigate={setView} />
+          </CartContext.Provider>
+        </ProductsContext.Provider>
+      </ThemeContext.Provider>
+    )
+  }
+
+  // Creator profile page
+  if (view === 'creator-profile' && selectedCreator) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
+          <CartContext.Provider value={cartContextValue}>
+            <CreatorProfilePage creator={selectedCreator} onNavigate={setView} />
+          </CartContext.Provider>
         </ProductsContext.Provider>
       </ThemeContext.Provider>
     )
@@ -3771,27 +5585,29 @@ export default function CrochettiApp() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <ProductsContext.Provider value={{ products, addProduct, updateProduct, deleteProduct }}>
-        <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410] flex">
-          <Sidebar
-            currentView={view}
-            onNavigate={setView}
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
+        <CartContext.Provider value={cartContextValue}>
+          <div className="min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410] flex">
+            <Sidebar
+              currentView={view}
+              onNavigate={setView}
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+            />
 
-          <ThemeContext.Provider value={{ theme, toggleTheme }}>
-            {view === 'dashboard' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'messages' && <MessagesPage onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'comments' && <CommentsPage onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'analytics' && <AnalyticsPage onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'shop-manage' && <ShopManagementPage onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'planner' && <PlannerPage onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'subscribers' && <SubscribersPage onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'explorer' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
-            {view === 'profile' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
-          </ThemeContext.Provider>
-        </div>
-        <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+            <ThemeContext.Provider value={{ theme, toggleTheme }}>
+              {view === 'dashboard' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'messages' && <MessagesPage onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'comments' && <CommentsPage onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'analytics' && <AnalyticsPage onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'shop-manage' && <ShopManagementPage onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'planner' && <PlannerPage onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'subscribers' && <SubscribersPage onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'explorer' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+              {view === 'profile' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+            </ThemeContext.Provider>
+          </div>
+          <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={setView} />
+        </CartContext.Provider>
       </ProductsContext.Provider>
     </ThemeContext.Provider>
   )
