@@ -1095,6 +1095,270 @@ function ProjectCard({ project, onLike }: { project: Project; onLike?: (id: numb
 }
 
 // ============================================
+// TOAST NOTIFICATION COMPONENT
+// ============================================
+
+function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error' | 'info'; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  const bgColor = type === 'success' ? 'bg-[#81B29A]' : type === 'error' ? 'bg-[#C96850]' : 'bg-[#D4AF37]'
+
+  return (
+    <div className={`fixed top-4 right-4 z-[200] ${bgColor} text-white px-6 py-3 rounded-xl shadow-xl flex items-center gap-3 animate-slide-in`}>
+      {type === 'success' && <CheckCircle className="w-5 h-5" />}
+      {type === 'error' && <XCircle className="w-5 h-5" />}
+      {type === 'info' && <AlertCircle className="w-5 h-5" />}
+      <span className="font-medium">{message}</span>
+      <button onClick={onClose} className="ml-2 hover:opacity-70"><X className="w-4 h-4" /></button>
+    </div>
+  )
+}
+
+// ============================================
+// ADD ADMIN MODAL
+// ============================================
+
+function AddAdminModal({ isOpen, onClose, onAdd }: {
+  isOpen: boolean
+  onClose: () => void
+  onAdd: (user: { name: string; email: string; role: 'admin' | 'creator' | 'user' }) => void
+}) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState<'admin' | 'creator' | 'user'>('admin')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const handleSubmit = () => {
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = 'Nom requis'
+    if (!email.trim()) newErrors.email = 'Email requis'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Email invalide'
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    onAdd({ name, email, role })
+    setName('')
+    setEmail('')
+    setRole('admin')
+    setErrors({})
+    onClose()
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-[#1A1410] border border-[rgba(212,175,55,0.3)] rounded-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-[rgba(212,175,55,0.2)]">
+          <h3 className="text-lg font-semibold text-[#F5F0E8]">Ajouter un utilisateur</h3>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-[#B8A88A] hover:text-[#F5F0E8]">
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div>
+            <Label className="text-[#B8A88A] mb-1 block">Nom complet *</Label>
+            <Input
+              value={name}
+              onChange={(e) => { setName(e.target.value); if (errors.name) setErrors(prev => ({ ...prev, name: '' })) }}
+              placeholder="Jean Dupont"
+              className={`bg-[#0D0A08] border-[rgba(212,175,55,0.2)] text-[#F5F0E8] ${errors.name ? 'border-red-500' : ''}`}
+            />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          </div>
+
+          <div>
+            <Label className="text-[#B8A88A] mb-1 block">Email *</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors(prev => ({ ...prev, email: '' })) }}
+              placeholder="jean@exemple.com"
+              className={`bg-[#0D0A08] border-[rgba(212,175,55,0.2)] text-[#F5F0E8] ${errors.email ? 'border-red-500' : ''}`}
+            />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          </div>
+
+          <div>
+            <Label className="text-[#B8A88A] mb-1 block">Rôle</Label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as 'admin' | 'creator' | 'user')}
+              className="w-full px-3 py-2 bg-[#0D0A08] border border-[rgba(212,175,55,0.2)] rounded-lg text-[#F5F0E8]"
+            >
+              <option value="admin">Admin</option>
+              <option value="creator">Créateur</option>
+              <option value="user">Utilisateur</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-[rgba(212,175,55,0.2)]">
+          <Button variant="outline" onClick={onClose} className="border-[rgba(212,175,55,0.3)] text-[#B8A88A]">
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit} className="bg-[#D4AF37] hover:bg-[#B8962F] text-[#0D0A08]">
+            <UserPlus className="w-4 h-4 mr-2" /> Ajouter
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// CONFIRM MODAL
+// ============================================
+
+function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText, variant = 'danger' }: {
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  title: string
+  message: string
+  confirmText: string
+  variant?: 'danger' | 'warning' | 'info'
+}) {
+  if (!isOpen) return null
+
+  const buttonColor = variant === 'danger' ? 'bg-[#C96850] hover:bg-[#A85A43]' : 
+                      variant === 'warning' ? 'bg-[#D4AF37] hover:bg-[#B8962F] text-[#0D0A08]' : 
+                      'bg-[#81B29A] hover:bg-[#6A9B84]'
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-sm bg-[#1A1410] border border-[rgba(212,175,55,0.3)] rounded-2xl shadow-2xl p-6 text-center">
+        <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+          variant === 'danger' ? 'bg-[#C96850]/20' : variant === 'warning' ? 'bg-[#D4AF37]/20' : 'bg-[#81B29A]/20'
+        }`}>
+          <AlertTriangle className={`w-8 h-8 ${
+            variant === 'danger' ? 'text-[#C96850]' : variant === 'warning' ? 'text-[#D4AF37]' : 'text-[#81B29A]'
+          }`} />
+        </div>
+        <h3 className="text-lg font-semibold text-[#F5F0E8] mb-2">{title}</h3>
+        <p className="text-[#B8A88A] text-sm mb-6">{message}</p>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onClose} className="flex-1 border-[rgba(212,175,55,0.3)] text-[#B8A88A]">
+            Annuler
+          </Button>
+          <Button onClick={() => { onConfirm(); onClose() }} className={`flex-1 ${buttonColor} text-white`}>
+            {confirmText}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// USER DETAIL MODAL
+// ============================================
+
+function UserDetailModal({ isOpen, onClose, user, onSuspend, onActivate }: {
+  isOpen: boolean
+  onClose: () => void
+  user: PlatformUser | null
+  onSuspend: () => void
+  onActivate: () => void
+}) {
+  if (!isOpen || !user) return null
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-[#1A1410] border border-[rgba(212,175,55,0.3)] rounded-2xl shadow-2xl overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center gap-4 mb-6">
+            <Avatar className="w-20 h-20 border-4 border-[#D4AF37]">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="bg-[#D4AF37] text-[#0D0A08] text-2xl">{user.name[0]}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-[#F5F0E8]">{user.name}</h3>
+                {user.verified && <CheckCircle className="w-5 h-5 text-[#D4AF37]" />}
+              </div>
+              <p className="text-[#B8A88A]">{user.email}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge className={`${
+                  user.role === 'superadmin' ? 'bg-[#D4AF37]/20 text-[#D4AF37]' :
+                  user.role === 'admin' ? 'bg-[#81B29A]/20 text-[#81B29A]' :
+                  user.role === 'creator' ? 'bg-[#C96850]/20 text-[#C96850]' :
+                  'bg-[#B8A88A]/20 text-[#B8A88A]'
+                }`}>
+                  {user.role === 'superadmin' ? 'SuperAdmin' : user.role === 'admin' ? 'Admin' : user.role === 'creator' ? 'Créateur' : 'Utilisateur'}
+                </Badge>
+                <Badge className={`${
+                  user.status === 'active' ? 'bg-[#81B29A]/20 text-[#81B29A]' :
+                  user.status === 'suspended' ? 'bg-[#C96850]/20 text-[#C96850]' :
+                  'bg-[#D4AF37]/20 text-[#D4AF37]'
+                }`}>
+                  {user.status === 'active' ? 'Actif' : user.status === 'suspended' ? 'Suspendu' : 'En attente'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-[#0D0A08] rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-[#D4AF37]">{user.projects}</p>
+              <p className="text-xs text-[#B8A88A]">Projets</p>
+            </div>
+            <div className="bg-[#0D0A08] rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-[#D4AF37]">{user.followers.toLocaleString()}</p>
+              <p className="text-xs text-[#B8A88A]">Abonnés</p>
+            </div>
+            <div className="bg-[#0D0A08] rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-[#81B29A]">{user.revenue > 0 ? `${user.revenue.toFixed(0)}€` : '-'}</p>
+              <p className="text-xs text-[#B8A88A]">Revenus</p>
+            </div>
+            <div className="bg-[#0D0A08] rounded-xl p-4 text-center">
+              <p className="text-sm font-bold text-[#F5F0E8]">{user.location}</p>
+              <p className="text-xs text-[#B8A88A]">Localisation</p>
+            </div>
+          </div>
+
+          <div className="space-y-2 text-sm mb-6">
+            <div className="flex justify-between text-[#B8A88A]">
+              <span>Inscrit le</span>
+              <span className="text-[#F5F0E8]">{user.joinedAt}</span>
+            </div>
+            <div className="flex justify-between text-[#B8A88A]">
+              <span>Dernière activité</span>
+              <span className="text-[#F5F0E8]">{user.lastActive}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onClose} className="flex-1 border-[rgba(212,175,55,0.3)] text-[#B8A88A]">
+              Fermer
+            </Button>
+            {user.status === 'active' ? (
+              <Button onClick={() => { onSuspend(); onClose() }} className="flex-1 bg-[#C96850] hover:bg-[#A85A43] text-white">
+                <Ban className="w-4 h-4 mr-2" /> Suspendre
+              </Button>
+            ) : (
+              <Button onClick={() => { onActivate(); onClose() }} className="flex-1 bg-[#81B29A] hover:bg-[#6A9B84] text-white">
+                <UserCheck className="w-4 h-4 mr-2" /> Activer
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
 // LUXURY LANDING PAGE COMPONENT
 // ============================================
 
@@ -2297,14 +2561,81 @@ function AdminUsersPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: View
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [users, setUsers] = useState(platformUsers)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null)
+  const [confirmAction, setConfirmAction] = useState<{ type: 'suspend' | 'activate' | 'delete'; userId: number } | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
 
-  const filteredUsers = platformUsers.filter(user => {
+  const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           user.email.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesRole = roleFilter === 'all' || user.role === roleFilter
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter
     return matchesSearch && matchesRole && matchesStatus
   })
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ message, type })
+  }
+
+  const handleAddUser = (userData: { name: string; email: string; role: 'admin' | 'creator' | 'user' }) => {
+    const newUser: PlatformUser = {
+      id: Math.max(...users.map(u => u.id)) + 1,
+      name: userData.name,
+      email: userData.email,
+      avatar: '/images/creators/creator1.png',
+      role: userData.role,
+      status: 'pending',
+      joinedAt: new Date().toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }),
+      lastActive: 'À l\'instant',
+      projects: 0,
+      followers: 0,
+      revenue: 0,
+      location: 'Non renseigné',
+      verified: false
+    }
+    setUsers(prev => [newUser, ...prev])
+    showToast(`${userData.name} a été ajouté comme ${userData.role === 'admin' ? 'administrateur' : userData.role === 'creator' ? 'créateur' : 'utilisateur'}`, 'success')
+  }
+
+  const handleViewUser = (user: PlatformUser) => {
+    setSelectedUser(user)
+    setShowUserModal(true)
+  }
+
+  const handleSuspendUser = (userId: number) => {
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'suspended' as const } : u))
+    const user = users.find(u => u.id === userId)
+    showToast(`${user?.name} a été suspendu`, 'warning')
+  }
+
+  const handleActivateUser = (userId: number) => {
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'active' as const } : u))
+    const user = users.find(u => u.id === userId)
+    showToast(`${user?.name} a été activé`, 'success')
+  }
+
+  const handleDeleteUser = (userId: number) => {
+    setUsers(prev => prev.filter(u => u.id !== userId))
+    const user = users.find(u => u.id === userId)
+    showToast(`${user?.name} a été supprimé`, 'error')
+  }
+
+  const openConfirmModal = (type: 'suspend' | 'activate' | 'delete', userId: number) => {
+    setConfirmAction({ type, userId })
+    setShowConfirmModal(true)
+  }
+
+  const executeConfirmAction = () => {
+    if (!confirmAction) return
+    if (confirmAction.type === 'suspend') handleSuspendUser(confirmAction.userId)
+    else if (confirmAction.type === 'activate') handleActivateUser(confirmAction.userId)
+    else if (confirmAction.type === 'delete') handleDeleteUser(confirmAction.userId)
+    setConfirmAction(null)
+  }
 
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
@@ -2326,6 +2657,32 @@ function AdminUsersPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: View
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Toast Notification */}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
+      {/* Add Admin Modal */}
+      <AddAdminModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onAdd={handleAddUser} />
+      
+      {/* User Detail Modal */}
+      <UserDetailModal 
+        isOpen={showUserModal} 
+        onClose={() => { setShowUserModal(false); setSelectedUser(null) }} 
+        user={selectedUser}
+        onSuspend={() => { if (selectedUser) handleSuspendUser(selectedUser.id) }}
+        onActivate={() => { if (selectedUser) handleActivateUser(selectedUser.id) }}
+      />
+      
+      {/* Confirm Modal */}
+      <ConfirmModal 
+        isOpen={showConfirmModal} 
+        onClose={() => { setShowConfirmModal(false); setConfirmAction(null) }}
+        onConfirm={executeConfirmAction}
+        title={confirmAction?.type === 'delete' ? 'Supprimer l\'utilisateur' : confirmAction?.type === 'suspend' ? 'Suspendre l\'utilisateur' : 'Activer l\'utilisateur'}
+        message={confirmAction?.type === 'delete' ? 'Cette action est irréversible. L\'utilisateur sera définitivement supprimé.' : confirmAction?.type === 'suspend' ? 'L\'utilisateur ne pourra plus accéder à son compte.' : 'L\'utilisateur pourra à nouveau accéder à son compte.'}
+        confirmText={confirmAction?.type === 'delete' ? 'Supprimer' : confirmAction?.type === 'suspend' ? 'Suspendre' : 'Activer'}
+        variant={confirmAction?.type === 'delete' ? 'danger' : confirmAction?.type === 'suspend' ? 'warning' : 'info'}
+      />
+
       {/* Header */}
       <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-4">
@@ -2335,10 +2692,10 @@ function AdminUsersPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: View
             </Button>
             <div>
               <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Gestion Utilisateurs</h1>
-              <p className="text-xs text-[#B8A88A] hidden sm:block">{platformUsers.length} utilisateurs sur la plateforme</p>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">{users.length} utilisateurs sur la plateforme</p>
             </div>
           </div>
-          <Button className="bg-[#D4AF37] hover:bg-[#B8962F] text-[#0D0A08]">
+          <Button onClick={() => setShowAddModal(true)} className="bg-[#D4AF37] hover:bg-[#B8962F] text-[#0D0A08]">
             <UserPlus className="w-4 h-4 mr-2" /> Ajouter Admin
           </Button>
         </div>
@@ -2421,18 +2778,42 @@ function AdminUsersPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: View
                         <td className="px-6 py-4 text-[#D4AF37]">{user.revenue > 0 ? `${user.revenue.toFixed(2)}€` : '-'}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]"
+                              onClick={() => handleViewUser(user)}
+                              title="Voir le profil"
+                            >
                               <Eye className="w-4 h-4 text-[#B8A88A]" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]"
+                              onClick={() => showToast(`Modification de ${user.name}`, 'info')}
+                              title="Modifier"
+                            >
                               <Edit className="w-4 h-4 text-[#B8A88A]" />
                             </Button>
                             {user.status === 'active' ? (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(201,104,80,0.1)]">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 hover:bg-[rgba(201,104,80,0.1)]"
+                                onClick={() => openConfirmModal('suspend', user.id)}
+                                title="Suspendre"
+                              >
                                 <Ban className="w-4 h-4 text-[#C96850]" />
                               </Button>
                             ) : (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(129,178,154,0.1)]">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 hover:bg-[rgba(129,178,154,0.1)]"
+                                onClick={() => openConfirmModal('activate', user.id)}
+                                title="Activer"
+                              >
                                 <UserCheck className="w-4 h-4 text-[#81B29A]" />
                               </Button>
                             )}
@@ -2457,8 +2838,28 @@ function AdminUsersPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: View
 
 function AdminContentPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
   const [filter, setFilter] = useState<'pending' | 'reviewed' | 'all'>('pending')
+  const [reports, setReports] = useState(reportedContent)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
 
-  const filteredReports = reportedContent.filter(r => filter === 'all' || r.status === filter)
+  const filteredReports = reports.filter(r => filter === 'all' || r.status === filter)
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ message, type })
+  }
+
+  const handleDeleteContent = (reportId: number) => {
+    setReports(prev => prev.map(r => r.id === reportId ? { ...r, status: 'resolved' as const } : r))
+    showToast('Contenu supprimé avec succès', 'success')
+  }
+
+  const handleDismissReport = (reportId: number) => {
+    setReports(prev => prev.map(r => r.id === reportId ? { ...r, status: 'dismissed' as const } : r))
+    showToast('Signalement ignoré', 'info')
+  }
+
+  const handleViewContent = (report: typeof reportedContent[0]) => {
+    showToast(`Visualisation du contenu: ${report.type}`, 'info')
+  }
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
@@ -2480,6 +2881,9 @@ function AdminContentPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Toast */}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       {/* Header */}
       <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-4">
@@ -2501,19 +2905,19 @@ function AdminContentPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
           <div className="grid grid-cols-3 gap-4">
             <Card className="bg-[#1A1410] border border-[rgba(201,104,80,0.3)]">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-[#C96850]">{reportedContent.filter(r => r.status === 'pending').length}</p>
+                <p className="text-3xl font-bold text-[#C96850]">{reports.filter(r => r.status === 'pending').length}</p>
                 <p className="text-xs text-[#B8A88A]">En attente</p>
               </CardContent>
             </Card>
             <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.3)]">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-[#D4AF37]">{reportedContent.filter(r => r.status === 'reviewed').length}</p>
+                <p className="text-3xl font-bold text-[#D4AF37]">{reports.filter(r => r.status === 'reviewed').length}</p>
                 <p className="text-xs text-[#B8A88A]">En révision</p>
               </CardContent>
             </Card>
             <Card className="bg-[#1A1410] border border-[rgba(129,178,154,0.3)]">
               <CardContent className="p-4 text-center">
-                <p className="text-3xl font-bold text-[#81B29A]">{reportedContent.filter(r => r.status === 'resolved').length}</p>
+                <p className="text-3xl font-bold text-[#81B29A]">{reports.filter(r => r.status === 'resolved').length}</p>
                 <p className="text-xs text-[#B8A88A]">Résolus</p>
               </CardContent>
             </Card>
@@ -2565,13 +2969,27 @@ function AdminContentPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
                       </div>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <Button size="sm" className="bg-[#C96850] hover:bg-[#A85A43] text-white">
+                      <Button 
+                        size="sm" 
+                        className="bg-[#C96850] hover:bg-[#A85A43] text-white"
+                        onClick={() => handleDeleteContent(report.id)}
+                      >
                         <Trash2 className="w-4 h-4 mr-1" /> Supprimer
                       </Button>
-                      <Button size="sm" variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]"
+                        onClick={() => handleDismissReport(report.id)}
+                      >
                         <CheckCircle className="w-4 h-4 mr-1" /> Ignorer
                       </Button>
-                      <Button size="sm" variant="outline" className="border-[rgba(129,178,154,0.3)] text-[#81B29A] hover:bg-[rgba(129,178,154,0.1)]">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-[rgba(129,178,154,0.3)] text-[#81B29A] hover:bg-[rgba(129,178,154,0.1)]"
+                        onClick={() => handleViewContent(report)}
+                      >
                         <Eye className="w-4 h-4 mr-1" /> Voir
                       </Button>
                     </div>
