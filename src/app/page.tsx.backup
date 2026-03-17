@@ -1,0 +1,3430 @@
+'use client'
+
+import { useState, useEffect, createContext, useContext } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import {
+  Search,
+  Bell,
+  User,
+  Heart,
+  MessageCircle,
+  Home,
+  FolderOpen,
+  Camera,
+  MessageSquare,
+  ShoppingCart,
+  BarChart3,
+  Settings,
+  LogOut,
+  Plus,
+  FileText,
+  TrendingUp,
+  TrendingDown,
+  Edit,
+  Trash2,
+  Eye,
+  ChevronRight,
+  ChevronDown,
+  HelpCircle,
+  Download,
+  Clock,
+  AlertCircle,
+  Menu,
+  X,
+  Shirt,
+  Baby,
+  LayoutDashboard,
+  Globe,
+  Instagram,
+  Facebook,
+  Twitter,
+  Youtube,
+  CreditCard,
+  Smartphone,
+  Moon,
+  Sun,
+  MapPin,
+  Mail,
+  Calendar,
+  Star,
+  Filter,
+  Grid,
+  List,
+  Minus,
+  Check,
+  Sparkles,
+  ArrowRight,
+  Users,
+  Package,
+  HeartHandshake,
+  Bookmark,
+  Share2,
+  Send,
+  Image,
+  MoreHorizontal,
+  ThumbsUp,
+  Flag,
+  Reply,
+  DollarSign,
+  Wallet,
+  PieChart,
+  Activity,
+  Target,
+  Award,
+  Gift,
+  Zap,
+  TrendingUp as TrendIcon,
+  CalendarDays,
+  BookOpen,
+  Video,
+  Play,
+  Users as UsersIcon,
+  Crown,
+  Megaphone,
+  BarChart2,
+  FileSpreadsheet,
+  RefreshCw,
+  ExternalLink,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  Clock as ClockIcon,
+  ShoppingBag,
+  CreditCard as CardIcon,
+  Truck,
+  Package as PackageIcon,
+  DollarSign as DollarIcon,
+  Percent,
+  Tag,
+  Filter as FilterIcon,
+  SortAsc,
+  LayoutGrid,
+  LayoutList,
+  BellRing,
+  CheckCheck,
+  Settings2,
+  UserPlus,
+  UserMinus,
+  MailOpen,
+  Archive,
+  StarOff,
+  Shield,
+  ShieldCheck,
+  ShieldAlert,
+  Ban,
+  UserCheck,
+  UserX,
+  Lock,
+  Unlock,
+  Database,
+  Server,
+  Layers,
+  Briefcase
+} from 'lucide-react'
+
+// ============================================
+// THEME CONTEXT
+// ============================================
+
+type Theme = 'light' | 'dark'
+
+interface ThemeContextType {
+  theme: Theme
+  toggleTheme: () => void
+}
+
+const ThemeContext = createContext<ThemeContextType>({
+  theme: 'light',
+  toggleTheme: () => {}
+})
+
+const useTheme = () => useContext(ThemeContext)
+
+// ============================================
+// TYPES
+// ============================================
+
+type ViewType = 'landing' | 'explorer' | 'creators' | 'boutique' | 'dashboard' | 'profile' | 'messages' | 'comments' | 'analytics' | 'shop-manage' | 'planner' | 'subscribers' | 'superadmin' | 'admin-users' | 'admin-content' | 'admin-analytics' | 'admin-revenue' | 'admin-settings'
+
+// User role type
+type UserRole = 'user' | 'creator' | 'admin' | 'superadmin'
+
+interface PlatformUser {
+  id: number
+  name: string
+  email: string
+  avatar: string
+  role: UserRole
+  status: 'active' | 'suspended' | 'pending'
+  joinedAt: string
+  lastActive: string
+  projects: number
+  followers: number
+  revenue: number
+  location: string
+  verified: boolean
+}
+
+interface ReportedContent {
+  id: number
+  type: 'project' | 'comment' | 'user' | 'message'
+  reportedBy: string
+  reportedUser: string
+  content: string
+  reason: string
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed'
+  reportedAt: string
+  severity: 'low' | 'medium' | 'high'
+}
+
+interface PlatformStats {
+  totalUsers: number
+  activeUsers: number
+  totalCreators: number
+  totalProjects: number
+  totalRevenue: number
+  monthlyGrowth: number
+  newUsersToday: number
+  pendingReports: number
+}
+
+interface RevenueData {
+  month: string
+  revenue: number
+  subscriptions: number
+  commissions: number
+  withdrawals: number
+}
+
+interface Project {
+  id: number
+  title: string
+  image: string
+  likes: number
+  comments: number
+  views: number
+  creator: { name: string; avatar: string }
+  tag: string
+  price?: number
+  description?: string
+  liked?: boolean
+}
+
+interface Creator {
+  id: number
+  name: string
+  avatar: string
+  specialty: string
+  followers: string
+  bio?: string
+  location?: string
+  projects?: number
+}
+
+interface Product {
+  id: number
+  title: string
+  image: string
+  price: number
+  category: string
+  creator: string
+  rating: number
+  reviews: number
+  description?: string
+}
+
+interface CartItem extends Product {
+  quantity: number
+}
+
+interface Message {
+  id: number
+  sender: { name: string; avatar: string }
+  content: string
+  time: string
+  isOwn: boolean
+  image?: string
+}
+
+interface Conversation {
+  id: number
+  user: { name: string; avatar: string }
+  lastMessage: string
+  time: string
+  unread: number
+  online: boolean
+}
+
+interface Comment {
+  id: number
+  user: { name: string; avatar: string }
+  content: string
+  time: string
+  project: string
+  likes: number
+  status: 'approved' | 'pending' | 'reported'
+}
+
+interface Notification {
+  id: number
+  type: 'like' | 'comment' | 'follow' | 'order' | 'message' | 'alert' | 'system'
+  title: string
+  message: string
+  time: string
+  read: boolean
+  icon: React.ReactNode
+}
+
+interface Subscriber {
+  id: number
+  name: string
+  avatar: string
+  joinedAt: string
+  status: 'active' | 'inactive' | 'new'
+  location: string
+}
+
+interface CalendarEvent {
+  id: number
+  title: string
+  date: string
+  type: 'publication' | 'live' | 'deadline' | 'reminder'
+  status: 'scheduled' | 'published' | 'draft'
+}
+
+// ============================================
+// DATA
+// ============================================
+
+const projects: Project[] = [
+  { id: 1, title: "Bonnet ours adorable", image: "/images/projects/bear-hat.png", likes: 24, comments: 8, views: 340, creator: { name: "Marie C.", avatar: "/images/creators/creator1.png" }, tag: "Accessoires", description: "Un adorable bonnet en forme d'ours pour les bébés." },
+  { id: 2, title: "Lapin amigurumi mint", image: "/images/projects/bunny.png", likes: 156, comments: 23, views: 890, creator: { name: "Sophie L.", avatar: "/images/creators/creator2.png" }, tag: "Jouets", description: "Un lapin amigurumi doux en couleur menthe." },
+  { id: 3, title: "Couverture granny square", image: "/images/projects/blanket.png", likes: 89, comments: 15, views: 560, creator: { name: "Claire D.", avatar: "/images/creators/creator3.png" }, tag: "Maison", description: "Une couverture colorée en granny square." },
+  { id: 4, title: "Cardigan bébé pastel", image: "/images/projects/cardigan.png", likes: 67, comments: 12, views: 450, creator: { name: "Emma R.", avatar: "/images/creators/creator4.png" }, tag: "Vêtements", description: "Un cardigan doux pour bébé." },
+  { id: 5, title: "Sac marché bohème", image: "/images/projects/bag.png", likes: 45, comments: 9, views: 320, creator: { name: "Léa M.", avatar: "/images/creators/creator5.png" }, tag: "Accessoires", description: "Un sac de marché bohème." },
+  { id: 6, title: "Bouquet de fleurs", image: "/images/projects/flowers.png", likes: 112, comments: 18, views: 670, creator: { name: "Anaïs P.", avatar: "/images/creators/creator6.png" }, tag: "Maison", description: "Un bouquet de fleurs crochetées." },
+]
+
+const creators: Creator[] = [
+  { id: 1, name: "Marie Crochet", avatar: "/images/creators/creator1.png", specialty: "Amigurumi", followers: "12.5k", bio: "Passionnée par les amigurumi depuis 5 ans.", location: "Paris, France", projects: 45 },
+  { id: 2, name: "Sophie Artisan", avatar: "/images/creators/creator2.png", specialty: "Vêtements", followers: "8.3k", bio: "Créatrice de vêtements crochet.", location: "Lyon, France", projects: 32 },
+  { id: 3, name: "Claire Créative", avatar: "/images/creators/creator3.png", specialty: "Maison", followers: "15.2k", bio: "Décoration maison et accessoires.", location: "Bordeaux, France", projects: 67 },
+  { id: 4, name: "Emma FaitMain", avatar: "/images/creators/creator4.png", specialty: "Bébé", followers: "6.7k", bio: "Spécialiste des créations pour bébés.", location: "Nantes, France", projects: 28 },
+  { id: 5, name: "Léa Bohème", avatar: "/images/creators/creator5.png", specialty: "Accessoires", followers: "9.1k", bio: "Sacs et accessoires originaux.", location: "Marseille, France", projects: 51 },
+  { id: 6, name: "Anaïs Design", avatar: "/images/creators/creator6.png", specialty: "Patrons", followers: "11.4k", bio: "Créatrice de patrons PDF.", location: "Toulouse, France", projects: 89 },
+]
+
+const products: Product[] = [
+  { id: 1, title: "Patron Lapin Amigurumi", image: "/images/projects/bunny.png", price: 8.99, category: "Patrons", creator: "Sophie L.", rating: 4.8, reviews: 45 },
+  { id: 2, title: "Kit Bonnet Ourson", image: "/images/projects/bear-hat.png", price: 24.99, category: "Kits", creator: "Marie C.", rating: 4.9, reviews: 32 },
+  { id: 3, title: "Patron Cardigan Bébé", image: "/images/projects/cardigan.png", price: 12.99, category: "Patrons", creator: "Emma R.", rating: 4.7, reviews: 28 },
+  { id: 4, title: "Kit Couverture Granny", image: "/images/projects/blanket.png", price: 45.99, category: "Kits", creator: "Claire D.", rating: 4.9, reviews: 56 },
+]
+
+const categories = [
+  { icon: Shirt, name: "Vêtements", count: 234, color: "bg-terracotta" },
+  { icon: ShoppingCart, name: "Accessoires", count: 189, color: "bg-sage" },
+  { icon: Home, name: "Maison", count: 156, color: "bg-mustard" },
+  { icon: Baby, name: "Jouets", count: 98, color: "bg-coral" },
+  { icon: FileText, name: "Patrons", count: 312, color: "bg-lavender" }
+]
+
+const menuItems = [
+  { icon: LayoutDashboard, label: 'Tableau de bord', view: 'dashboard' as ViewType, active: true },
+  { icon: FolderOpen, label: 'Mes Projets', view: 'dashboard' as ViewType },
+  { icon: MessageSquare, label: 'Messages', view: 'messages' as ViewType, badge: 3 },
+  { icon: MessageCircle, label: 'Commentaires', view: 'comments' as ViewType, badge: 12 },
+  { icon: Heart, label: 'Favoris', view: 'profile' as ViewType },
+  { icon: BarChart3, label: 'Statistiques', view: 'analytics' as ViewType },
+  { icon: ShoppingBag, label: 'Boutique', view: 'shop-manage' as ViewType },
+  { icon: CalendarDays, label: 'Planificateur', view: 'planner' as ViewType },
+  { icon: Users, label: 'Abonnés', view: 'subscribers' as ViewType },
+  { icon: Settings, label: 'Paramètres', view: 'profile' as ViewType },
+  { icon: HelpCircle, label: 'Aide & Support', view: 'dashboard' as ViewType },
+]
+
+const statsCards = [
+  { label: 'Publications', value: '24', trend: '+12%', trendUp: true, color: 'text-terracotta', icon: Camera },
+  { label: 'Abonnés', value: '1,247', trend: '+8%', trendUp: true, color: 'text-sage', icon: Users },
+  { label: 'Likes reçus', value: '3,856', trend: '+25%', trendUp: true, color: 'text-mustard', icon: Heart },
+  { label: 'Vues', value: '12,450', trend: '+15%', trendUp: true, color: 'text-coral', icon: Eye },
+]
+
+const tableProjects = [
+  { id: 1, title: 'Bonnet Ourson Hiver 2024', thumbnail: '/images/projects/bear-hat.png', category: 'Vêtements', status: 'published', likes: 156, views: 1240, comments: 23, date: '15 Mars 2024' },
+  { id: 2, title: 'Lapin Amigurumi Mint', thumbnail: '/images/projects/bunny.png', category: 'Jouets', status: 'published', likes: 89, views: 890, comments: 15, date: '12 Mars 2024' },
+  { id: 3, title: 'Couverture Granny Square', thumbnail: '/images/projects/blanket.png', category: 'Maison', status: 'draft', likes: 0, views: 45, comments: 0, date: '10 Mars 2024' },
+  { id: 4, title: 'Cardigan Bébé Pastel', thumbnail: '/images/projects/cardigan.png', category: 'Vêtements', status: 'published', likes: 234, views: 1890, comments: 34, date: '8 Mars 2024' },
+  { id: 5, title: 'Sac Marché Bohème', thumbnail: '/images/projects/bag.png', category: 'Accessoires', status: 'published', likes: 67, views: 560, comments: 8, date: '5 Mars 2024' },
+  { id: 6, title: 'Bouquet de Fleurs', thumbnail: '/images/projects/flowers.png', category: 'Maison', status: 'archived', likes: 112, views: 980, comments: 18, date: '1 Mars 2024' },
+]
+
+const conversations: Conversation[] = [
+  { id: 1, user: { name: "Sophie L.", avatar: "/images/creators/creator2.png" }, lastMessage: "J'adore votre patron du lapin!", time: "2min", unread: 2, online: true },
+  { id: 2, user: { name: "Claire D.", avatar: "/images/creators/creator3.png" }, lastMessage: "Pouvez-vous m'aider pour le point...", time: "1h", unread: 0, online: false },
+  { id: 3, user: { name: "Emma R.", avatar: "/images/creators/creator4.png" }, lastMessage: "Merci pour le conseil!", time: "3h", unread: 1, online: true },
+  { id: 4, user: { name: "Léa M.", avatar: "/images/creators/creator5.png" }, lastMessage: "Quand est-ce que vous publiez...", time: "1j", unread: 0, online: false },
+  { id: 5, user: { name: "Anaïs P.", avatar: "/images/creators/creator6.png" }, lastMessage: "Super collaboration!", time: "2j", unread: 0, online: true },
+]
+
+const messages: Message[] = [
+  { id: 1, sender: { name: "Sophie L.", avatar: "/images/creators/creator2.png" }, content: "Bonjour! J'ai acheté votre patron du lapin amigurumi et je l'adore! 🐰", time: "10:30", isOwn: false },
+  { id: 2, sender: { name: "Marie", avatar: "/images/creators/creator1.png" }, content: "Merci beaucoup Sophie! Je suis ravie qu'il vous plaise. N'hésitez pas si vous avez des questions!", time: "10:32", isOwn: true },
+  { id: 3, sender: { name: "Sophie L.", avatar: "/images/creators/creator2.png" }, content: "En fait, j'ai une question sur l'assemblage des oreilles. Avez-vous un conseil?", time: "10:35", isOwn: false },
+  { id: 4, sender: { name: "Marie", avatar: "/images/creators/creator1.png" }, content: "Bien sûr! Pour les oreilles, je vous conseille de les coudre avec le même fil que vous avez utilisé, en faisant plusieurs points discrets à la base.", time: "10:38", isOwn: true },
+  { id: 5, sender: { name: "Sophie L.", avatar: "/images/creators/creator2.png" }, content: "Parfait, merci! Voici mon résultat:", time: "10:45", isOwn: false, image: "/images/projects/bunny.png" },
+]
+
+const comments: Comment[] = [
+  { id: 1, user: { name: "Sophie L.", avatar: "/images/creators/creator2.png" }, content: "Magnifique création! J'adore les couleurs choisies.", time: "2min", project: "Bonnet Ourson", likes: 5, status: 'approved' },
+  { id: 2, user: { name: "Claire D.", avatar: "/images/creators/creator3.png" }, content: "Pouvez-vous partager le patron?", time: "15min", project: "Lapin Amigurumi", likes: 3, status: 'approved' },
+  { id: 3, user: { name: "Emma R.", avatar: "/images/creators/creator4.png" }, content: "Très beau travail!", time: "1h", project: "Cardigan Bébé", likes: 8, status: 'pending' },
+  { id: 4, user: { name: "Léa M.", avatar: "/images/creators/creator5.png" }, content: "Contenu inapproprié signalé", time: "2h", project: "Couverture Granny", likes: 0, status: 'reported' },
+  { id: 5, user: { name: "Anaïs P.", avatar: "/images/creators/creator6.png" }, content: "Quelle inspiration! Je vais essayer.", time: "3h", project: "Sac Bohème", likes: 12, status: 'approved' },
+]
+
+const notifications: Notification[] = [
+  { id: 1, type: 'like', title: 'Nouveau like', message: 'Sophie L. a aimé votre projet "Bonnet Ourson"', time: '2min', read: false, icon: <Heart className="w-4 h-4 text-terracotta" /> },
+  { id: 2, type: 'comment', title: 'Nouveau commentaire', message: 'Claire D. a commenté "Lapin Amigurumi"', time: '15min', read: false, icon: <MessageCircle className="w-4 h-4 text-sage" /> },
+  { id: 3, type: 'follow', title: 'Nouvel abonné', message: 'Emma R. vous suit maintenant', time: '1h', read: false, icon: <UserPlus className="w-4 h-4 text-mustard" /> },
+  { id: 4, type: 'order', title: 'Nouvelle commande', message: 'Patron Lapin vendu pour 8.99€', time: '2h', read: true, icon: <ShoppingBag className="w-4 h-4 text-sage" /> },
+  { id: 5, type: 'message', title: 'Nouveau message', message: 'Vous avez 3 messages non lus', time: '3h', read: true, icon: <MessageSquare className="w-4 h-4 text-coral" /> },
+  { id: 6, type: 'alert', title: 'Rappel', message: 'Complétez votre profil pour plus de visibilité', time: '1j', read: true, icon: <AlertCircle className="w-4 h-4 text-coral" /> },
+]
+
+const subscribers: Subscriber[] = [
+  { id: 1, name: "Sophie Laurent", avatar: "/images/creators/creator2.png", joinedAt: "Mars 2024", status: "active", location: "Paris" },
+  { id: 2, name: "Claire Dubois", avatar: "/images/creators/creator3.png", joinedAt: "Février 2024", status: "active", location: "Lyon" },
+  { id: 3, name: "Emma Martin", avatar: "/images/creators/creator4.png", joinedAt: "Janvier 2024", status: "new", location: "Bordeaux" },
+  { id: 4, name: "Léa Moreau", avatar: "/images/creators/creator5.png", joinedAt: "Décembre 2023", status: "inactive", location: "Nantes" },
+  { id: 5, name: "Anaïs Petit", avatar: "/images/creators/creator6.png", joinedAt: "Mars 2024", status: "active", location: "Marseille" },
+]
+
+const calendarEvents: CalendarEvent[] = [
+  { id: 1, title: "Publication Bonnet Printemps", date: "18 Mars", type: "publication", status: "scheduled" },
+  { id: 2, title: "Live Tutoriel Amigurumi", date: "20 Mars", type: "live", status: "scheduled" },
+  { id: 3, title: "Deadline Patron VIP", date: "22 Mars", type: "deadline", status: "draft" },
+  { id: 4, title: "Rappel: Répondre aux messages", date: "23 Mars", type: "reminder", status: "scheduled" },
+]
+
+const shopStats = {
+  totalSales: 1245.67,
+  ordersCount: 45,
+  pendingOrders: 3,
+  topProduct: "Patron Lapin Amigurumi",
+  stock: 156,
+  lowStock: 5
+}
+
+// SuperAdmin Data
+const platformStats: PlatformStats = {
+  totalUsers: 45892,
+  activeUsers: 12847,
+  totalCreators: 3421,
+  totalProjects: 89234,
+  totalRevenue: 234567.89,
+  monthlyGrowth: 23.5,
+  newUsersToday: 234,
+  pendingReports: 47
+}
+
+const platformUsers: PlatformUser[] = [
+  { id: 1, name: "Marie Crochet", email: "marie@crochetti.com", avatar: "/images/creators/creator1.png", role: "creator", status: "active", joinedAt: "Jan 2024", lastActive: "2 min", projects: 45, followers: 12500, revenue: 2456.78, location: "Paris, France", verified: true },
+  { id: 2, name: "Sophie Artisan", email: "sophie@crochetti.com", avatar: "/images/creators/creator2.png", role: "creator", status: "active", joinedAt: "Fév 2024", lastActive: "15 min", projects: 32, followers: 8300, revenue: 1234.56, location: "Lyon, France", verified: true },
+  { id: 3, name: "Jean Dupont", email: "jean@email.com", avatar: "/images/creators/creator3.png", role: "user", status: "active", joinedAt: "Mars 2024", lastActive: "1h", projects: 0, followers: 234, revenue: 0, location: "Bordeaux, France", verified: false },
+  { id: 4, name: "Admin Pierre", email: "pierre@crochetti.com", avatar: "/images/creators/creator4.png", role: "admin", status: "active", joinedAt: "Dec 2023", lastActive: "5 min", projects: 0, followers: 0, revenue: 0, location: "Paris, France", verified: true },
+  { id: 5, name: "Claire Design", email: "claire@crochetti.com", avatar: "/images/creators/creator5.png", role: "creator", status: "suspended", joinedAt: "Jan 2024", lastActive: "2j", projects: 67, followers: 15200, revenue: 3456.78, location: "Marseille, France", verified: true },
+  { id: 6, name: "Emma Bébé", email: "emma@crochetti.com", avatar: "/images/creators/creator6.png", role: "creator", status: "active", joinedAt: "Fév 2024", lastActive: "30 min", projects: 28, followers: 6700, revenue: 987.65, location: "Nantes, France", verified: false },
+  { id: 7, name: "Lucas Martin", email: "lucas@email.com", avatar: "/images/creators/creator1.png", role: "user", status: "pending", joinedAt: "Mars 2024", lastActive: "3h", projects: 0, followers: 56, revenue: 0, location: "Lille, France", verified: false },
+  { id: 8, name: "Camille Tricot", email: "camille@crochetti.com", avatar: "/images/creators/creator2.png", role: "creator", status: "active", joinedAt: "Jan 2024", lastActive: "1h", projects: 51, followers: 9100, revenue: 1567.89, location: "Toulouse, France", verified: true },
+]
+
+const reportedContent: ReportedContent[] = [
+  { id: 1, type: "project", reportedBy: "Jean D.", reportedUser: "Claire Design", content: "Couverture Granny - Contenu potentiellement inapproprié signalé par plusieurs utilisateurs", reason: "Contenu inapproprié", status: "pending", reportedAt: "Il y a 2h", severity: "high" },
+  { id: 2, type: "comment", reportedBy: "Marie C.", reportedUser: "Lucas Martin", content: "Ce commentaire est offensant et ne respecte pas les règles de la communauté...", reason: "Harcèlement", status: "pending", reportedAt: "Il y a 4h", severity: "medium" },
+  { id: 3, type: "user", reportedBy: "Sophie L.", reportedUser: "Compte suspect", content: "Activité suspecte détectée - Possible compte spam", reason: "Spam", status: "reviewed", reportedAt: "Il y a 1j", severity: "low" },
+  { id: 4, type: "message", reportedBy: "Emma R.", reportedUser: "Pierre A.", content: "Message non sollicité avec liens commerciaux", reason: "Spam commercial", status: "pending", reportedAt: "Il y a 6h", severity: "medium" },
+  { id: 5, type: "project", reportedBy: "Admin", reportedUser: "Test User", content: "Violation des droits d'auteur - Image copiée", reason: "Copyright", status: "resolved", reportedAt: "Il y a 2j", severity: "high" },
+]
+
+const revenueData: RevenueData[] = [
+  { month: "Jan", revenue: 18500, subscriptions: 8500, commissions: 6500, withdrawals: 3500 },
+  { month: "Fév", revenue: 21200, subscriptions: 9200, commissions: 7500, withdrawals: 4500 },
+  { month: "Mar", revenue: 19800, subscriptions: 8800, commissions: 6800, withdrawals: 4200 },
+  { month: "Avr", revenue: 24500, subscriptions: 10500, commissions: 8800, withdrawals: 5200 },
+  { month: "Mai", revenue: 28900, subscriptions: 12000, commissions: 10500, withdrawals: 6400 },
+  { month: "Juin", revenue: 32500, subscriptions: 13500, commissions: 12000, withdrawals: 7000 },
+]
+
+const adminMenuItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', view: 'superadmin' as ViewType },
+  { icon: Users, label: 'Utilisateurs', view: 'admin-users' as ViewType },
+  { icon: AlertTriangle, label: 'Modération', view: 'admin-content' as ViewType, badge: 47 },
+  { icon: BarChart3, label: 'Analytics', view: 'admin-analytics' as ViewType },
+  { icon: DollarSign, label: 'Revenus', view: 'admin-revenue' as ViewType },
+  { icon: Settings, label: 'Paramètres', view: 'admin-settings' as ViewType },
+  { icon: Globe, label: 'Retour au site', view: 'landing' as ViewType },
+]
+
+// ============================================
+// CHART COMPONENTS
+// ============================================
+
+function SimpleLineChart() {
+  const points = [30, 45, 35, 55, 48, 62, 58, 75, 68, 82, 78, 95]
+  const svgWidth = 400
+  const svgHeight = 150
+  const padding = 20
+  const chartWidth = svgWidth - padding * 2
+  const chartHeight = svgHeight - padding * 2
+  const maxVal = Math.max(...points)
+  
+  const pathPoints = points.map((val, i) => {
+    const x = padding + (i / (points.length - 1)) * chartWidth
+    const y = svgHeight - padding - (val / maxVal) * chartHeight
+    return `${x},${y}`
+  }).join(' ')
+  
+  const areaPath = `M${padding},${svgHeight - padding} L${pathPoints} L${svgWidth - padding},${svgHeight - padding} Z`
+
+  return (
+    <svg width="100%" height={svgHeight} viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#E07A5F" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#E07A5F" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={areaPath} fill="url(#lineGradient)" />
+      <polyline points={pathPoints} fill="none" stroke="#E07A5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {points.map((val, i) => {
+        const x = padding + (i / (points.length - 1)) * chartWidth
+        const y = svgHeight - padding - (val / maxVal) * chartHeight
+        return <circle key={i} cx={x} cy={y} r="3" fill="#E07A5F" />
+      })}
+    </svg>
+  )
+}
+
+function SimplePieChart() {
+  const data = [
+    { label: 'Amigurumi', value: 40, color: '#E07A5F' },
+    { label: 'Vêtements', value: 30, color: '#81B29A' },
+    { label: 'Maison', value: 20, color: '#F4D35E' },
+    { label: 'Autres', value: 10, color: '#B8A9C9' },
+  ]
+  
+  let cumulativePercent = 0
+  const radius = 50
+  const centerX = 60
+  const centerY = 60
+  
+  const arcs = data.map((item) => {
+    const startAngle = cumulativePercent * 3.6 * (Math.PI / 180)
+    cumulativePercent += item.value
+    const endAngle = cumulativePercent * 3.6 * (Math.PI / 180)
+    
+    const x1 = centerX + radius * Math.cos(startAngle - Math.PI / 2)
+    const y1 = centerY + radius * Math.sin(startAngle - Math.PI / 2)
+    const x2 = centerX + radius * Math.cos(endAngle - Math.PI / 2)
+    const y2 = centerY + radius * Math.sin(endAngle - Math.PI / 2)
+    
+    const largeArc = item.value > 50 ? 1 : 0
+    
+    return {
+      path: `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`,
+      color: item.color,
+      label: item.label,
+      value: item.value
+    }
+  })
+
+  return (
+    <div className="flex items-center gap-4">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        {arcs.map((arc, i) => (
+          <path key={i} d={arc.path} fill={arc.color} stroke="white" strokeWidth="1" />
+        ))}
+      </svg>
+      <div className="space-y-2">
+        {data.map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+            <span className="text-xs text-brown-light dark:text-white/70">{item.label}</span>
+            <span className="text-xs font-medium text-brown dark:text-white">{item.value}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// SHARED COMPONENTS
+// ============================================
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      className="rounded-full hover:bg-cream-dark dark:hover:bg-white/10"
+    >
+      {theme === 'light' ? (
+        <Moon className="w-5 h-5 text-brown-light" />
+      ) : (
+        <Sun className="w-5 h-5 text-white/70" />
+      )}
+    </Button>
+  )
+}
+
+function ProjectCard({ project, onLike }: { project: Project; onLike?: (id: number) => void }) {
+  const [isLiked, setIsLiked] = useState(project.liked || false)
+  const [likeCount, setLikeCount] = useState(project.likes)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleLike = () => {
+    setIsLiked(!isLiked)
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1)
+    onLike?.(project.id)
+  }
+
+  return (
+    <Card 
+      className="group bg-white dark:bg-brown-light border-border dark:border-white/10 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden animate-fade-in"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="relative aspect-square overflow-hidden">
+        <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className={`absolute inset-0 bg-brown/40 transition-opacity duration-300 flex items-center justify-center gap-4 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+          <Button size="icon" variant="secondary" className="rounded-full bg-white/90 hover:bg-white" onClick={handleLike}>
+            <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'text-terracotta fill-terracotta' : 'text-terracotta'}`} />
+          </Button>
+          <Button size="icon" variant="secondary" className="rounded-full bg-white/90 hover:bg-white">
+            <MessageCircle className="w-5 h-5 text-sage" />
+          </Button>
+          <Button size="icon" variant="secondary" className="rounded-full bg-white/90 hover:bg-white">
+            <Bookmark className="w-5 h-5 text-mustard" />
+          </Button>
+        </div>
+        <Badge className="absolute top-3 left-3 bg-white/90 dark:bg-brown/90 text-brown-light dark:text-white text-xs">{project.tag}</Badge>
+      </div>
+      <CardContent className="p-4">
+        <h3 className="font-medium text-brown dark:text-white text-sm mb-2 truncate">{project.title}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Heart className={`w-4 h-4 ${isLiked ? 'text-terracotta fill-terracotta' : 'text-terracotta'}`} />
+            <span className="text-sm text-brown-light dark:text-white/70">{likeCount}</span>
+            <MessageCircle className="w-4 h-4 text-sage ml-2" />
+            <span className="text-sm text-brown-light dark:text-white/70">{project.comments}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Avatar className="w-6 h-6 border border-sage">
+            <AvatarImage src={project.creator.avatar} alt={project.creator.name} />
+            <AvatarFallback className="bg-sage text-white text-xs">{project.creator.name[0]}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-brown dark:text-white font-medium">{project.creator.name}</span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ============================================
+// LUXURY LANDING PAGE COMPONENT
+// ============================================
+
+function LuxuryLandingPage({ onNavigate }: { onNavigate: (view: ViewType) => void }) {
+  const [email, setEmail] = useState('')
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    setIsVisible(true)
+  }, [])
+
+  const stats = [
+    { value: '15K+', label: 'Créateurs d\'Exception', icon: Crown },
+    { value: '50K+', label: 'Projets Uniques', icon: Sparkles },
+    { value: '100K+', label: 'Membres Passionnés', icon: Users },
+    { value: '5K+', label: 'Patrons Exclusifs', icon: FileText },
+  ]
+
+  const categories = [
+    { name: 'Vêtements Haute Couture', count: 234, image: '/images/landing/cat-fashion.png' },
+    { name: 'Accessoires Luxe', count: 189, image: '/images/landing/cat-accessories.png' },
+    { name: 'Maison & Déco', count: 156, image: '/images/landing/cat-home.png' },
+    { name: 'Jouets d\'Art', count: 98, image: '/images/landing/cat-baby.png' },
+    { name: 'Patrons Premium', count: 312, image: '/images/landing/cat-patterns.png' },
+  ]
+
+  const featuredProjects = [
+    { id: 1, title: 'Cardigan Bébé Deluxe', image: '/images/landing/project-featured.png', creator: 'Marie Crochet', likes: 156, featured: true },
+    { id: 2, title: 'Lapin Amigurumi Mint', image: '/images/landing/project-amigurumi.png', creator: 'Sophie Art', likes: 89 },
+    { id: 3, title: 'Couverture Granny Luxe', image: '/images/landing/project-blanket.png', creator: 'Claire Design', likes: 234 },
+    { id: 4, title: 'Sac Bohème Chic', image: '/images/landing/project-bag.png', creator: 'Léa Mode', likes: 67 },
+    { id: 5, title: 'Bouquet de Fleurs', image: '/images/landing/project-flowers.png', creator: 'Anaïs Fleur', likes: 112 },
+    { id: 6, title: 'Bonnet Ourson Premium', image: '/images/landing/project-bear.png', creator: 'Emma Bébé', likes: 98 },
+  ]
+
+  const premiumCreators = [
+    { name: 'Marie Crochet', avatar: '/images/landing/creator1.png', specialty: 'Amigurumi', followers: '12.5K', verified: true },
+    { name: 'Sophie Artisan', avatar: '/images/landing/creator2.png', specialty: 'Vêtements', followers: '8.3K', verified: true },
+    { name: 'Claire Créative', avatar: '/images/landing/creator3.png', specialty: 'Maison', followers: '15.2K', verified: true },
+    { name: 'Emma Design', avatar: '/images/landing/creator4.png', specialty: 'Bébé', followers: '6.7K', verified: false },
+  ]
+
+  const testimonials = [
+    { name: 'Marie C.', location: 'Dakar', text: 'Crochetti a transformé ma passion en véritable entreprise. Une communauté d\'excellence !', rating: 5 },
+    { name: 'Sophie L.', location: 'Paris', text: 'Les patrons premium sont d\'une qualité exceptionnelle. Je recommande vivement !', rating: 5 },
+    { name: 'Claire D.', location: 'Lyon', text: 'Grâce à Crochetti, j\'ai pu monétiser mes créations et vivre de ma passion.', rating: 5 },
+  ]
+
+  const features = [
+    { icon: Globe, title: 'Visibilité Internationale', description: 'Partagez vos créations avec une audience mondiale passionnée' },
+    { icon: Crown, title: 'Monétisation Simplifiée', description: 'Vendez vos patrons et créations facilement avec notre système intégré' },
+    { icon: Users, title: 'Communauté d\'Élite', description: 'Rejoignez les meilleurs créateurs et apprenez des experts' },
+  ]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#FAF9F6] to-[#FDFCF0]">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#E07A5F]/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <span className="font-fredoka text-2xl font-bold bg-gradient-to-r from-[#E07A5F] to-[#D4AF37] bg-clip-text text-transparent">
+              Crochetti
+            </span>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#categories" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Explorer</a>
+              <a href="#creators" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Créateurs</a>
+              <a href="#features" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Fonctionnalités</a>
+              <a href="#pricing" className="text-[#3D2914]/70 hover:text-[#E07A5F] transition-colors text-sm font-medium">Tarifs</a>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                className="text-[#3D2914] hover:bg-[#E07A5F]/10"
+                onClick={() => onNavigate('dashboard')}
+              >
+                Connexion
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-[#E07A5F] to-[#c96b52] text-white rounded-full px-6 hover:shadow-lg hover:shadow-[#E07A5F]/30 transition-all"
+                onClick={() => onNavigate('dashboard')}
+              >
+                Commencer
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        {/* Background */}
+        <div className="absolute inset-0">
+          <img 
+            src="/images/landing/hero-bg.png" 
+            alt="Crochet background" 
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#FAF9F6] via-transparent to-[#FDFCF0]" />
+        </div>
+        
+        {/* Floating Elements Animation */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-8 h-8 rounded-full opacity-20"
+              style={{
+                background: `linear-gradient(135deg, ${i % 2 === 0 ? '#E07A5F' : '#D4AF37'}, transparent)`,
+                left: `${15 + i * 15}%`,
+                top: `${20 + (i % 3) * 25}%`,
+                animation: `float ${4 + i}s ease-in-out infinite`,
+                animationDelay: `${i * 0.5}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className={`relative z-10 max-w-6xl mx-auto px-4 text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          {/* Logo with Shimmer */}
+          <div className="mb-6">
+            <span className="font-fredoka text-5xl md:text-7xl font-bold bg-gradient-to-r from-[#E07A5F] via-[#D4AF37] to-[#E07A5F] bg-clip-text text-transparent animate-shimmer">
+              Crochetti
+            </span>
+          </div>
+          
+          {/* Headline */}
+          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-[#2D2416] mb-6 leading-tight">
+            L'Art du Crochet
+            <span className="block mt-2 bg-gradient-to-r from-[#E07A5F] to-[#D4AF37] bg-clip-text text-transparent">
+              Sublimé
+            </span>
+          </h1>
+          
+          {/* Subtitle */}
+          <p className="text-lg md:text-xl text-[#3D2914]/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Rejoignez l'élite des créateurs et transformez votre passion en succès. 
+            Une communauté premium dédiée à l'excellence du crochet artisanal.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <Button 
+              size="lg"
+              className="group bg-gradient-to-r from-[#E07A5F] to-[#c96b52] text-white rounded-full px-8 py-6 text-lg hover:shadow-xl hover:shadow-[#E07A5F]/30 transition-all duration-300"
+              onClick={() => onNavigate('dashboard')}
+            >
+              Commencer l'Aventure
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button 
+              size="lg"
+              variant="outline"
+              className="rounded-full px-8 py-6 text-lg border-2 border-[#E07A5F] text-[#E07A5F] hover:bg-[#E07A5F] hover:text-white transition-all duration-300"
+              onClick={() => onNavigate('explorer')}
+            >
+              Explorer la Collection
+            </Button>
+          </div>
+
+          {/* Scroll Indicator */}
+          <div className="animate-bounce">
+            <ChevronDown className="w-8 h-8 text-[#E07A5F] mx-auto" />
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 bg-gradient-to-r from-[#3D2914] to-[#5a3d1e] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4AF37' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }} />
+        </div>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div 
+                key={index}
+                className="text-center group"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#D4AF37]/20 to-transparent mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <stat.icon className="w-8 h-8 text-[#D4AF37]" />
+                </div>
+                <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
+                <div className="text-white/70 text-sm md:text-base">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section id="categories" className="py-24 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#2D2416] mb-4">
+              Explorez l'Excellence
+            </h2>
+            <p className="text-[#3D2914]/70 max-w-2xl mx-auto">
+              Découvrez des catégories soigneusement curated pour inspirer votre créativité
+            </p>
+          </div>
+          
+          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {categories.map((category, index) => (
+              <div 
+                key={index}
+                className="group flex-shrink-0 w-72 md:w-80 snap-center cursor-pointer"
+              >
+                <div className="relative h-80 rounded-2xl overflow-hidden shadow-xl">
+                  <img 
+                    src={category.image} 
+                    alt={category.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2416] via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-white text-xl font-semibold mb-2 group-hover:text-[#D4AF37] transition-colors">
+                      {category.name}
+                    </h3>
+                    <p className="text-[#D4AF37] text-sm">{category.count} projets</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Projects Section */}
+      <section className="py-24 bg-gradient-to-b from-[#FAF9F6] to-[#FDFCF0]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#2D2416] mb-4">
+              Créations d'Exception
+            </h2>
+            <p className="text-[#3D2914]/70 max-w-2xl mx-auto">
+              Les œuvres les plus remarquables de notre communauté d'élite
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredProjects.map((project, index) => (
+              <div 
+                key={project.id}
+                className={`group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                  index === 0 ? 'md:col-span-2 md:row-span-2 h-96 md:h-auto' : 'h-72'
+                }`}
+              >
+                <img 
+                  src={project.image} 
+                  alt={project.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#2D2416] via-[#2D2416]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  {project.featured && (
+                    <span className="inline-flex items-center gap-1 bg-[#D4AF37] text-[#2D2416] text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                      <Crown className="w-3 h-3" /> Coup de Cœur
+                    </span>
+                  )}
+                  <h3 className="text-white text-lg font-semibold">{project.title}</h3>
+                  <p className="text-white/70 text-sm">par {project.creator}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Heart className="w-4 h-4 text-[#E07A5F]" />
+                    <span className="text-white/70 text-sm">{project.likes}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              size="lg"
+              variant="outline"
+              className="rounded-full px-8 border-2 border-[#E07A5F] text-[#E07A5F] hover:bg-[#E07A5F] hover:text-white"
+              onClick={() => onNavigate('explorer')}
+            >
+              Voir toutes les créations
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Premium Creators Section */}
+      <section id="creators" className="py-24 bg-[#3D2914] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 50 L60 40 L70 50 L60 60 Z' fill='%23D4AF37' fill-opacity='0.5'/%3E%3C/svg%3E")`,
+          }} />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-5xl font-bold text-white mb-4">
+              Les Maîtres Créateurs
+            </h2>
+            <p className="text-white/60 max-w-2xl mx-auto">
+              Rencontrez les talents d'exception qui façonnent l'univers Crochetti
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {premiumCreators.map((creator, index) => (
+              <div 
+                key={index}
+                className="group text-center"
+              >
+                <div className="relative inline-block mb-4">
+                  <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-[#D4AF37] group-hover:scale-105 transition-transform duration-300">
+                    <img 
+                      src={creator.avatar} 
+                      alt={creator.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {creator.verified && (
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#D4AF37] rounded-full flex items-center justify-center">
+                      <Check className="w-5 h-5 text-[#2D2416]" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-white font-semibold text-lg mb-1">{creator.name}</h3>
+                <p className="text-[#D4AF37] text-sm mb-2">{creator.specialty}</p>
+                <div className="flex items-center justify-center gap-1 text-white/60 text-sm">
+                  <Users className="w-4 h-4" />
+                  {creator.followers} abonnés
+                </div>
+                <Button 
+                  size="sm"
+                  className="mt-4 rounded-full bg-gradient-to-r from-[#E07A5F] to-[#c96b52] text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Suivre
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 bg-gradient-to-b from-[#FDFCF0] to-[#FAF9F6]">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#2D2416] mb-4">
+              Ils Témoignent
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div 
+                key={index}
+                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-[#D4AF37] text-[#D4AF37]" />
+                  ))}
+                </div>
+                <p className="text-[#3D2914]/80 italic mb-6 leading-relaxed">
+                  "{testimonial.text}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#E07A5F] to-[#D4AF37]" />
+                  <div>
+                    <p className="font-semibold text-[#2D2416]">{testimonial.name}</p>
+                    <p className="text-sm text-[#3D2914]/60">{testimonial.location}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-24 bg-[#FAF9F6]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#2D2416] mb-4">
+              Pourquoi Crochetti ?
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E07A5F]/10 to-[#D4AF37]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-8 h-8 text-[#E07A5F]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#2D2416] mb-3">{feature.title}</h3>
+                <p className="text-[#3D2914]/70 leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter VIP Section */}
+      <section className="py-24 bg-gradient-to-r from-[#E07A5F] to-[#c96b52] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='30' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E")`,
+          }} />
+        </div>
+        
+        <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
+          <Crown className="w-16 h-16 text-white/80 mx-auto mb-6" />
+          <h2 className="font-serif text-3xl md:text-5xl font-bold text-white mb-4">
+            Rejoignez le Cercle Privé
+          </h2>
+          <p className="text-white/80 mb-8 max-w-xl mx-auto">
+            Recevez exclusivités, patrons premium et invitations événements en avant-première
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <Input
+              type="email"
+              placeholder="votre@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 bg-white/20 border-white/30 text-white placeholder:text-white/60 rounded-full px-6"
+            />
+            <Button 
+              className="bg-white text-[#E07A5F] rounded-full px-8 hover:bg-[#D4AF37] hover:text-white transition-colors"
+            >
+              Rejoindre
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#2D2416] text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+            {/* Brand */}
+            <div className="col-span-2">
+              <span className="font-fredoka text-2xl font-bold bg-gradient-to-r from-[#E07A5F] to-[#D4AF37] bg-clip-text text-transparent">
+                Crochetti
+              </span>
+              <p className="text-white/60 mt-4 max-w-xs leading-relaxed">
+                La communauté premium dédiée à l'excellence du crochet artisanal.
+              </p>
+              <div className="flex items-center gap-4 mt-6">
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E07A5F] transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E07A5F] transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E07A5F] transition-colors">
+                  <Youtube className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h4 className="font-semibold text-[#D4AF37] mb-4">Explorer</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Projets</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Créateurs</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Patrons</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Tutoriels</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-[#D4AF37] mb-4">Ressources</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Centre d'aide</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Guides</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">FAQ</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-[#D4AF37] mb-4">Légal</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Conditions</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Confidentialité</a></li>
+                <li><a href="#" className="text-white/60 hover:text-white transition-colors">Cookies</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Payment Methods */}
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-white/40 text-sm">
+              © 2024 Crochetti. Tous droits réservés.
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="text-white/40 text-sm">Paiement sécurisé:</span>
+              <div className="flex items-center gap-2">
+                <div className="px-3 py-1 bg-white/10 rounded text-xs">Orange Money</div>
+                <div className="px-3 py-1 bg-white/10 rounded text-xs">Wave</div>
+                <div className="px-3 py-1 bg-white/10 rounded text-xs">Stripe</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+// ============================================
+// SIDEBAR COMPONENT
+// ============================================
+
+function Sidebar({ 
+  currentView, 
+  onNavigate, 
+  isOpen, 
+  onClose 
+}: { 
+  currentView: ViewType
+  onNavigate: (view: ViewType) => void
+  isOpen: boolean
+  onClose: () => void
+}) {
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
+      
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-[280px] 
+        bg-[#1A1410] text-[#F5F0E8]
+        transform transition-transform duration-300 lg:transform-none
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        flex flex-col
+        border-r border-[rgba(212,175,55,0.2)]
+      `}>
+        {/* Logo */}
+        <div className="p-6 border-b border-[rgba(212,175,55,0.2)] flex items-center justify-between">
+          <span 
+            className="font-fredoka text-2xl font-bold cursor-pointer text-gold-gradient hover:opacity-80 transition-opacity" 
+            onClick={() => { onNavigate('landing'); onClose(); }}
+          >
+            Crochetti
+          </span>
+          <Button variant="ghost" size="icon" className="lg:hidden text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]" onClick={onClose}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        {/* Navigation */}
+        <ScrollArea className="flex-1 px-4 py-6">
+          <nav className="space-y-1">
+            {menuItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => { onNavigate(item.view); onClose(); }}
+                className={`
+                  w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                  ${currentView === item.view && item.view !== 'dashboard'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#F4E5C2] text-[#1A1410] font-semibold shadow-lg shadow-[rgba(212,175,55,0.3)]' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }
+                `}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="flex-1 text-left text-sm">{item.label}</span>
+                {item.badge && (
+                  <span className="bg-[#C96850] text-white text-xs px-2 py-0.5 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            ))}
+          </nav>
+        </ScrollArea>
+
+        {/* User Profile */}
+        <div className="p-4 border-t border-[rgba(212,175,55,0.2)]">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(212,175,55,0.1)] hover:bg-[rgba(212,175,55,0.15)] transition-colors cursor-pointer border border-[rgba(212,175,55,0.2)]" onClick={() => { onNavigate('profile'); onClose(); }}>
+            <Avatar className="w-10 h-10 border-2 border-[#D4AF37]">
+              <AvatarImage src="/images/creators/creator1.png" alt="User" />
+              <AvatarFallback className="bg-[#81B29A] text-white">ML</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm text-[#F5F0E8] truncate">Marie Laurent</p>
+              <Badge className="bg-[rgba(212,175,55,0.2)] text-[#D4AF37] text-[10px] px-2 py-0 border border-[rgba(212,175,55,0.3)]">
+                <Crown className="w-3 h-3 mr-1" /> Créateur Pro
+              </Badge>
+            </div>
+          </div>
+          <button className="w-full flex items-center gap-3 px-4 py-3 mt-2 text-[#B8A88A] hover:text-[#D4AF37] transition-colors rounded-xl hover:bg-[rgba(212,175,55,0.1)]">
+            <LogOut className="w-5 h-5" />
+            <span className="text-sm">Déconnexion</span>
+          </button>
+        </div>
+      </aside>
+    </>
+  )
+}
+
+// ============================================
+// SUPERADMIN SIDEBAR COMPONENT
+// ============================================
+
+function SuperAdminSidebar({ 
+  currentView, 
+  onNavigate, 
+  isOpen, 
+  onClose 
+}: { 
+  currentView: ViewType
+  onNavigate: (view: ViewType) => void
+  isOpen: boolean
+  onClose: () => void
+}) {
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
+      
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-[280px] 
+        bg-gradient-to-b from-[#0D0A08] to-[#1A1410] text-[#F5F0E8]
+        transform transition-transform duration-300 lg:transform-none
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        flex flex-col
+        border-r border-[rgba(212,175,55,0.15)]
+      `}>
+        {/* Logo with Shield */}
+        <div className="p-6 border-b border-[rgba(212,175,55,0.15)] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#8B6914] flex items-center justify-center">
+              <Shield className="w-5 h-5 text-[#0D0A08]" />
+            </div>
+            <div>
+              <span className="font-fredoka text-lg font-bold text-gold-gradient">Crochetti</span>
+              <p className="text-[10px] text-[#D4AF37] -mt-1">SuperAdmin</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" className="lg:hidden text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]" onClick={onClose}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="p-4 border-b border-[rgba(212,175,55,0.1)]">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-[rgba(212,175,55,0.1)] rounded-lg p-2 text-center border border-[rgba(212,175,55,0.2)]">
+              <p className="text-lg font-bold text-[#D4AF37]">{platformStats.newUsersToday}</p>
+              <p className="text-[10px] text-[#B8A88A]">Nouveaux</p>
+            </div>
+            <div className="bg-[rgba(201,104,80,0.1)] rounded-lg p-2 text-center border border-[rgba(201,104,80,0.2)]">
+              <p className="text-lg font-bold text-[#C96850]">{platformStats.pendingReports}</p>
+              <p className="text-[10px] text-[#B8A88A]">Alertes</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <ScrollArea className="flex-1 px-3 py-4">
+          <div className="mb-4">
+            <p className="text-[10px] text-[#B8A88A] uppercase tracking-wider px-3 mb-2">Principal</p>
+            <nav className="space-y-1">
+              <button
+                onClick={() => { onNavigate('superadmin'); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${currentView === 'superadmin'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#0D0A08] font-semibold' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span className="text-sm">Dashboard</span>
+              </button>
+              <button
+                onClick={() => { onNavigate('admin-users'); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${currentView === 'admin-users'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#0D0A08] font-semibold' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }`}
+              >
+                <Users className="w-4 h-4" />
+                <span className="text-sm">Utilisateurs</span>
+              </button>
+              <button
+                onClick={() => { onNavigate('admin-content'); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${currentView === 'admin-content'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#0D0A08] font-semibold' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }`}
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm">Modération</span>
+                <span className="ml-auto bg-[#C96850] text-white text-xs px-1.5 py-0.5 rounded-full">{platformStats.pendingReports}</span>
+              </button>
+            </nav>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-[10px] text-[#B8A88A] uppercase tracking-wider px-3 mb-2">Analytics</p>
+            <nav className="space-y-1">
+              <button
+                onClick={() => { onNavigate('admin-analytics'); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${currentView === 'admin-analytics'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#0D0A08] font-semibold' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span className="text-sm">Statistiques</span>
+              </button>
+              <button
+                onClick={() => { onNavigate('admin-revenue'); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${currentView === 'admin-revenue'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#0D0A08] font-semibold' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }`}
+              >
+                <DollarSign className="w-4 h-4" />
+                <span className="text-sm">Revenus</span>
+              </button>
+            </nav>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-[10px] text-[#B8A88A] uppercase tracking-wider px-3 mb-2">Système</p>
+            <nav className="space-y-1">
+              <button
+                onClick={() => { onNavigate('admin-settings'); onClose(); }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${currentView === 'admin-settings'
+                    ? 'bg-gradient-to-r from-[#D4AF37] to-[#B8962F] text-[#0D0A08] font-semibold' 
+                    : 'text-[#B8A88A] hover:bg-[rgba(212,175,55,0.1)] hover:text-[#F5F0E8]'
+                  }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span className="text-sm">Paramètres</span>
+              </button>
+            </nav>
+          </div>
+        </ScrollArea>
+
+        {/* Quick Actions */}
+        <div className="p-4 border-t border-[rgba(212,175,55,0.15)]">
+          <Button 
+            onClick={() => { onNavigate('landing'); onClose(); }}
+            variant="outline" 
+            className="w-full border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)] gap-2"
+          >
+            <Globe className="w-4 h-4" />
+            Voir le site
+          </Button>
+          <Button 
+            onClick={() => { onNavigate('dashboard'); onClose(); }}
+            variant="ghost" 
+            className="w-full mt-2 text-[#B8A88A] hover:text-[#F5F0E8] hover:bg-[rgba(212,175,55,0.1)] gap-2"
+          >
+            <Briefcase className="w-4 h-4" />
+            Mode Créateur
+          </Button>
+        </div>
+
+        {/* Admin Profile */}
+        <div className="p-4 border-t border-[rgba(212,175,55,0.15)]">
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.2)]">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8B6914] flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-[#0D0A08]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm text-[#F5F0E8]">SuperAdmin</p>
+              <p className="text-[10px] text-[#D4AF37]">Accès complet</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
+  )
+}
+
+// ============================================
+// SUPERADMIN DASHBOARD PAGE
+// ============================================
+
+function SuperAdminDashboard({ onNavigate, onOpenSidebar }: { onNavigate: (view: ViewType) => void; onOpenSidebar: () => void }) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
+  const adminStats = [
+    { label: 'Utilisateurs Totaux', value: platformStats.totalUsers.toLocaleString(), icon: Users, color: 'text-[#D4AF37]', bg: 'bg-[rgba(212,175,55,0.1)]', trend: '+12.5%' },
+    { label: 'Créateurs Actifs', value: platformStats.totalCreators.toLocaleString(), icon: Crown, color: 'text-[#81B29A]', bg: 'bg-[rgba(129,178,154,0.1)]', trend: '+8.3%' },
+    { label: 'Projets Publiés', value: platformStats.totalProjects.toLocaleString(), icon: FolderOpen, color: 'text-[#C96850]', bg: 'bg-[rgba(201,104,80,0.1)]', trend: '+15.2%' },
+    { label: 'Revenus Totaux', value: `${(platformStats.totalRevenue / 1000).toFixed(0)}K€`, icon: DollarSign, color: 'text-[#E8947B]', bg: 'bg-[rgba(232,148,123,0.1)]', trend: '+23.5%' },
+  ]
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Dashboard Admin</h1>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">Vue d'ensemble de la plateforme Crochetti</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 lg:gap-4">
+            <div className="hidden md:flex relative max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8A88A]" />
+              <Input placeholder="Rechercher..." className="pl-10 bg-[#1A1410] border-[rgba(212,175,55,0.2)] text-[#F5F0E8] rounded-full w-64 placeholder:text-[#B8A88A]/60" />
+            </div>
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="relative hover:bg-[rgba(212,175,55,0.1)]" onClick={() => onNavigate('admin-content')}>
+              <Bell className="w-5 h-5 text-[#B8A88A]" />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C96850] rounded-full text-[10px] text-white flex items-center justify-center">{platformStats.pendingReports}</span>
+            </Button>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8B6914] flex items-center justify-center">
+              <ShieldCheck className="w-5 h-5 text-[#0D0A08]" />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Stats Cards */}
+          <section className="animate-fade-in">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {adminStats.map((stat, index) => (
+                <Card key={index} className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)] hover:border-[rgba(212,175,55,0.4)] transition-all duration-300">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[#B8A88A] text-xs uppercase tracking-wider mb-1">{stat.label}</p>
+                        <p className={`text-2xl lg:text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+                        <div className="flex items-center gap-1 text-xs mt-1 text-[#81B29A]">
+                          <TrendingUp className="w-3 h-3" />
+                          {stat.trend}
+                        </div>
+                      </div>
+                      <div className={`${stat.bg} p-2.5 rounded-lg`}>
+                        <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Recent Activity */}
+              <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-[#D4AF37]" /> Activité Récente
+                    </CardTitle>
+                    <Button variant="ghost" size="sm" className="text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]">Voir tout</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {notifications.slice(0, 5).map((notif) => (
+                    <div key={notif.id} className="flex items-start gap-3 p-3 rounded-lg bg-[#0D0A08] border border-[rgba(212,175,55,0.1)]">
+                      <div className="mt-0.5">{notif.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-[#F5F0E8] font-medium">{notif.title}</p>
+                        <p className="text-xs text-[#B8A88A] truncate">{notif.message}</p>
+                      </div>
+                      <span className="text-xs text-[#B8A88A]/60">{notif.time}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Platform Growth Chart */}
+              <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-[#81B29A]" /> Croissance Plateforme
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-48 flex items-end gap-2">
+                    {revenueData.map((data, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                        <div 
+                          className="w-full bg-gradient-to-t from-[#D4AF37] to-[#F4E5C2] rounded-t transition-all duration-300 hover:from-[#81B29A] hover:to-[#B8D4BE]"
+                          style={{ height: `${(data.revenue / 35000) * 100}%` }}
+                        />
+                        <span className="text-[10px] text-[#B8A88A]">{data.month}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Pending Reports */}
+              <Card className="bg-[#1A1410] border border-[rgba(201,104,80,0.3)]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-[#C96850]" /> Signalements en Attente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {reportedContent.filter(r => r.status === 'pending').slice(0, 3).map((report) => (
+                    <div key={report.id} className="p-3 rounded-lg bg-[#0D0A08] border border-[rgba(201,104,80,0.2)]">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className={`${report.severity === 'high' ? 'bg-[#C96850]' : report.severity === 'medium' ? 'bg-[#D4AF37]' : 'bg-[#81B29A]'} text-[10px] text-[#0D0A08]`}>
+                          {report.severity === 'high' ? 'Urgent' : report.severity === 'medium' ? 'Moyen' : 'Faible'}
+                        </Badge>
+                        <span className="text-xs text-[#B8A88A]">{report.type}</span>
+                      </div>
+                      <p className="text-sm text-[#F5F0E8] truncate">{report.content}</p>
+                      <p className="text-xs text-[#B8A88A] mt-1">Par {report.reportedBy} • {report.reportedAt}</p>
+                    </div>
+                  ))}
+                  <Button 
+                    onClick={() => onNavigate('admin-content')}
+                    className="w-full bg-[#C96850] hover:bg-[#A85A43] text-white"
+                  >
+                    Voir tous les signalements
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-[#D4AF37]" /> Actions Rapides
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)] flex-col h-auto py-4" onClick={() => onNavigate('admin-users')}>
+                    <UserPlus className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Gérer Users</span>
+                  </Button>
+                  <Button variant="outline" className="border-[rgba(201,104,80,0.3)] text-[#C96850] hover:bg-[rgba(201,104,80,0.1)] flex-col h-auto py-4" onClick={() => onNavigate('admin-content')}>
+                    <AlertTriangle className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Modérer</span>
+                  </Button>
+                  <Button variant="outline" className="border-[rgba(129,178,154,0.3)] text-[#81B29A] hover:bg-[rgba(129,178,154,0.1)] flex-col h-auto py-4" onClick={() => onNavigate('admin-analytics')}>
+                    <BarChart3 className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Analytics</span>
+                  </Button>
+                  <Button variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)] flex-col h-auto py-4" onClick={() => onNavigate('admin-settings')}>
+                    <Settings className="w-5 h-5 mb-1" />
+                    <span className="text-xs">Paramètres</span>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* System Status */}
+              <Card className="bg-[#1A1410] border border-[rgba(129,178,154,0.3)]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                    <Server className="w-5 h-5 text-[#81B29A]" /> État du Système
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#B8A88A]">Serveur API</span>
+                    <Badge className="bg-[#81B29A]/20 text-[#81B29A] border border-[#81B29A]/30">Opérationnel</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#B8A88A]">Base de données</span>
+                    <Badge className="bg-[#81B29A]/20 text-[#81B29A] border border-[#81B29A]/30">Opérationnel</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#B8A88A]">CDN Images</span>
+                    <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">Maintenance</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#B8A88A]">Paiements</span>
+                    <Badge className="bg-[#81B29A]/20 text-[#81B29A] border border-[#81B29A]/30">Opérationnel</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// ADMIN USERS PAGE
+// ============================================
+
+function AdminUsersPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: ViewType) => void; onOpenSidebar: () => void }) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+
+  const filteredUsers = platformUsers.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter
+    const matchesStatus = statusFilter === 'all' || user.status === statusFilter
+    return matchesSearch && matchesRole && matchesStatus
+  })
+
+  const getRoleBadge = (role: UserRole) => {
+    switch (role) {
+      case 'superadmin': return <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30"><Shield className="w-3 h-3 mr-1" />SuperAdmin</Badge>
+      case 'admin': return <Badge className="bg-[#81B29A]/20 text-[#81B29A] border border-[#81B29A]/30"><ShieldCheck className="w-3 h-3 mr-1" />Admin</Badge>
+      case 'creator': return <Badge className="bg-[#C96850]/20 text-[#C96850] border border-[#C96850]/30"><Crown className="w-3 h-3 mr-1" />Créateur</Badge>
+      default: return <Badge className="bg-[#B8A88A]/20 text-[#B8A88A] border border-[#B8A88A]/30">Utilisateur</Badge>
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active': return <Badge className="bg-[#81B29A]/20 text-[#81B29A] border border-[#81B29A]/30">Actif</Badge>
+      case 'suspended': return <Badge className="bg-[#C96850]/20 text-[#C96850] border border-[#C96850]/30">Suspendu</Badge>
+      case 'pending': return <Badge className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">En attente</Badge>
+      default: return null
+    }
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Gestion Utilisateurs</h1>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">{platformUsers.length} utilisateurs sur la plateforme</p>
+            </div>
+          </div>
+          <Button className="bg-[#D4AF37] hover:bg-[#B8962F] text-[#0D0A08]">
+            <UserPlus className="w-4 h-4 mr-2" /> Ajouter Admin
+          </Button>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8A88A]" />
+              <Input 
+                placeholder="Rechercher un utilisateur..." 
+                className="pl-10 bg-[#1A1410] border-[rgba(212,175,55,0.2)] text-[#F5F0E8] rounded-lg"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <select 
+                className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)] text-[#F5F0E8] rounded-lg px-4 py-2"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <option value="all">Tous les rôles</option>
+                <option value="superadmin">SuperAdmin</option>
+                <option value="admin">Admin</option>
+                <option value="creator">Créateur</option>
+                <option value="user">Utilisateur</option>
+              </select>
+              <select 
+                className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)] text-[#F5F0E8] rounded-lg px-4 py-2"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">Tous les statuts</option>
+                <option value="active">Actif</option>
+                <option value="suspended">Suspendu</option>
+                <option value="pending">En attente</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Users Table */}
+          <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-[rgba(212,175,55,0.2)]">
+                      <th className="text-left text-xs font-medium text-[#B8A88A] uppercase tracking-wider px-6 py-4">Utilisateur</th>
+                      <th className="text-left text-xs font-medium text-[#B8A88A] uppercase tracking-wider px-6 py-4">Rôle</th>
+                      <th className="text-left text-xs font-medium text-[#B8A88A] uppercase tracking-wider px-6 py-4">Statut</th>
+                      <th className="text-left text-xs font-medium text-[#B8A88A] uppercase tracking-wider px-6 py-4">Projets</th>
+                      <th className="text-left text-xs font-medium text-[#B8A88A] uppercase tracking-wider px-6 py-4">Revenus</th>
+                      <th className="text-left text-xs font-medium text-[#B8A88A] uppercase tracking-wider px-6 py-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[rgba(212,175,55,0.1)]">
+                    {filteredUsers.map((user) => (
+                      <tr key={user.id} className="hover:bg-[#0D0A08] transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10 border border-[rgba(212,175,55,0.3)]">
+                              <AvatarImage src={user.avatar} alt={user.name} />
+                              <AvatarFallback className="bg-[#2D2416] text-[#D4AF37]">{user.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[#F5F0E8] font-medium">{user.name}</p>
+                                {user.verified && <CheckCircle className="w-4 h-4 text-[#D4AF37]" />}
+                              </div>
+                              <p className="text-xs text-[#B8A88A]">{user.email}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
+                        <td className="px-6 py-4">{getStatusBadge(user.status)}</td>
+                        <td className="px-6 py-4 text-[#F5F0E8]">{user.projects}</td>
+                        <td className="px-6 py-4 text-[#D4AF37]">{user.revenue > 0 ? `${user.revenue.toFixed(2)}€` : '-'}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]">
+                              <Eye className="w-4 h-4 text-[#B8A88A]" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]">
+                              <Edit className="w-4 h-4 text-[#B8A88A]" />
+                            </Button>
+                            {user.status === 'active' ? (
+                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(201,104,80,0.1)]">
+                                <Ban className="w-4 h-4 text-[#C96850]" />
+                              </Button>
+                            ) : (
+                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(129,178,154,0.1)]">
+                                <UserCheck className="w-4 h-4 text-[#81B29A]" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// ADMIN CONTENT MODERATION PAGE
+// ============================================
+
+function AdminContentPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  const [filter, setFilter] = useState<'pending' | 'reviewed' | 'all'>('pending')
+
+  const filteredReports = reportedContent.filter(r => filter === 'all' || r.status === filter)
+
+  const getSeverityBadge = (severity: string) => {
+    switch (severity) {
+      case 'high': return <Badge className="bg-[#C96850] text-white">Urgent</Badge>
+      case 'medium': return <Badge className="bg-[#D4AF37] text-[#0D0A08]">Moyen</Badge>
+      default: return <Badge className="bg-[#81B29A] text-white">Faible</Badge>
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'project': return <FolderOpen className="w-4 h-4" />
+      case 'comment': return <MessageCircle className="w-4 h-4" />
+      case 'user': return <User className="w-4 h-4" />
+      case 'message': return <Mail className="w-4 h-4" />
+      default: return <AlertCircle className="w-4 h-4" />
+    }
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Modération du Contenu</h1>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">Gérez les signalements et modérez le contenu</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-5xl mx-auto space-y-6">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <Card className="bg-[#1A1410] border border-[rgba(201,104,80,0.3)]">
+              <CardContent className="p-4 text-center">
+                <p className="text-3xl font-bold text-[#C96850]">{reportedContent.filter(r => r.status === 'pending').length}</p>
+                <p className="text-xs text-[#B8A88A]">En attente</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.3)]">
+              <CardContent className="p-4 text-center">
+                <p className="text-3xl font-bold text-[#D4AF37]">{reportedContent.filter(r => r.status === 'reviewed').length}</p>
+                <p className="text-xs text-[#B8A88A]">En révision</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#1A1410] border border-[rgba(129,178,154,0.3)]">
+              <CardContent className="p-4 text-center">
+                <p className="text-3xl font-bold text-[#81B29A]">{reportedContent.filter(r => r.status === 'resolved').length}</p>
+                <p className="text-xs text-[#B8A88A]">Résolus</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex gap-2">
+            {(['pending', 'reviewed', 'all'] as const).map((f) => (
+              <Button 
+                key={f}
+                variant={filter === f ? 'default' : 'outline'}
+                className={filter === f 
+                  ? 'bg-[#D4AF37] text-[#0D0A08]' 
+                  : 'border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]'
+                }
+                onClick={() => setFilter(f)}
+              >
+                {f === 'pending' ? 'En attente' : f === 'reviewed' ? 'En révision' : 'Tous'}
+              </Button>
+            ))}
+          </div>
+
+          {/* Reports List */}
+          <div className="space-y-4">
+            {filteredReports.map((report) => (
+              <Card key={report.id} className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-lg ${report.severity === 'high' ? 'bg-[#C96850]/20' : report.severity === 'medium' ? 'bg-[#D4AF37]/20' : 'bg-[#81B29A]/20'}`}>
+                      <AlertTriangle className={`w-6 h-6 ${report.severity === 'high' ? 'text-[#C96850]' : report.severity === 'medium' ? 'text-[#D4AF37]' : 'text-[#81B29A]'}`} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-2 text-[#B8A88A]">
+                          {getTypeIcon(report.type)}
+                          <span className="text-sm capitalize">{report.type}</span>
+                        </div>
+                        {getSeverityBadge(report.severity)}
+                        <span className="text-xs text-[#B8A88A]">{report.reportedAt}</span>
+                      </div>
+                      <p className="text-[#F5F0E8] mb-2">{report.content}</p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="text-[#B8A88A]">Signalé par: <span className="text-[#F5F0E8]">{report.reportedBy}</span></span>
+                        <span className="text-[#B8A88A]">Utilisateur: <span className="text-[#C96850]">{report.reportedUser}</span></span>
+                      </div>
+                      <div className="mt-2 p-2 bg-[#0D0A08] rounded-lg">
+                        <span className="text-xs text-[#B8A88A]">Raison: </span>
+                        <span className="text-xs text-[#F5F0E8]">{report.reason}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button size="sm" className="bg-[#C96850] hover:bg-[#A85A43] text-white">
+                        <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]">
+                        <CheckCircle className="w-4 h-4 mr-1" /> Ignorer
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-[rgba(129,178,154,0.3)] text-[#81B29A] hover:bg-[rgba(129,178,154,0.1)]">
+                        <Eye className="w-4 h-4 mr-1" /> Voir
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// ADMIN ANALYTICS PAGE
+// ============================================
+
+function AdminAnalyticsPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Analytics Plateforme</h1>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">Statistiques détaillées de la plateforme</p>
+            </div>
+          </div>
+          <Button variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)]">
+            <Download className="w-4 h-4 mr-2" /> Exporter
+          </Button>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* KPIs */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: 'Utilisateurs Actifs', value: '12,847', icon: Users, color: '#D4AF37', change: '+12%' },
+              { label: 'Sessions/Jour', value: '45,231', icon: Activity, color: '#81B29A', change: '+8%' },
+              { label: 'Temps Moyen', value: '12:45', icon: Clock, color: '#C96850', change: '+5%' },
+              { label: 'Taux Conversion', value: '3.2%', icon: Target, color: '#E8947B', change: '+15%' },
+            ].map((kpi, i) => (
+              <Card key={i} className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-2 rounded-lg" style={{ backgroundColor: `${kpi.color}20` }}>
+                      <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
+                    </div>
+                    <span className="text-xs text-[#81B29A]">{kpi.change}</span>
+                  </div>
+                  <p className="text-2xl font-bold text-[#F5F0E8]">{kpi.value}</p>
+                  <p className="text-xs text-[#B8A88A]">{kpi.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+              <CardHeader>
+                <CardTitle className="text-[#F5F0E8] font-fredoka">Croissance Utilisateurs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64 flex items-end gap-2">
+                  {revenueData.map((data, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div 
+                        className="w-full bg-gradient-to-t from-[#D4AF37] to-[#F4E5C2] rounded-t"
+                        style={{ height: `${(data.subscriptions / 15000) * 100}%` }}
+                      />
+                      <span className="text-[10px] text-[#B8A88A]">{data.month}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+              <CardHeader>
+                <CardTitle className="text-[#F5F0E8] font-fredoka">Répartition par Type</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { label: 'Créateurs', value: 3421, percent: 75, color: '#D4AF37' },
+                    { label: 'Utilisateurs', value: 42345, percent: 92, color: '#81B29A' },
+                    { label: 'Admins', value: 126, percent: 3, color: '#C96850' },
+                  ].map((item, i) => (
+                    <div key={i}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-[#F5F0E8]">{item.label}</span>
+                        <span className="text-[#B8A88A]">{item.value.toLocaleString()}</span>
+                      </div>
+                      <div className="h-2 bg-[#0D0A08] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${item.percent}%`, backgroundColor: item.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Top Countries */}
+          <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+            <CardHeader>
+              <CardTitle className="text-[#F5F0E8] font-fredoka">Top Pays</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { country: 'France', users: 28450, flag: '🇫🇷' },
+                  { country: 'Sénégal', users: 8934, flag: '🇸🇳' },
+                  { country: 'Belgique', users: 5621, flag: '🇧🇪' },
+                  { country: 'Canada', users: 4532, flag: '🇨🇦' },
+                  { country: 'Maroc', users: 3892, flag: '🇲🇦' },
+                  { country: 'Suisse', users: 2845, flag: '🇨🇭' },
+                  { country: 'Côte d\'Ivoire', users: 2134, flag: '🇨🇮' },
+                  { country: 'Tunisie', users: 1876, flag: '🇹🇳' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 bg-[#0D0A08] rounded-lg border border-[rgba(212,175,55,0.1)]">
+                    <span className="text-2xl">{item.flag}</span>
+                    <div>
+                      <p className="text-[#F5F0E8] font-medium">{item.country}</p>
+                      <p className="text-xs text-[#B8A88A]">{item.users.toLocaleString()} utilisateurs</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// ADMIN REVENUE PAGE
+// ============================================
+
+function AdminRevenuePage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Gestion Revenus</h1>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">Suivez les revenus et transactions de la plateforme</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Revenue Summary */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-gradient-to-br from-[#D4AF37] to-[#8B6914] border-0">
+              <CardContent className="p-4">
+                <p className="text-sm text-[#0D0A08]/70">Revenu Total</p>
+                <p className="text-3xl font-bold text-[#0D0A08]">234,567€</p>
+                <p className="text-xs text-[#0D0A08]/60 mt-1">+23.5% ce mois</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+              <CardContent className="p-4">
+                <p className="text-sm text-[#B8A88A]">Commissions</p>
+                <p className="text-3xl font-bold text-[#D4AF37]">45,234€</p>
+                <p className="text-xs text-[#81B29A] mt-1">+18% ce mois</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+              <CardContent className="p-4">
+                <p className="text-sm text-[#B8A88A]">Abonnements</p>
+                <p className="text-3xl font-bold text-[#81B29A]">62,500€</p>
+                <p className="text-xs text-[#81B29A] mt-1">+12% ce mois</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+              <CardContent className="p-4">
+                <p className="text-sm text-[#B8A88A]">En Attente</p>
+                <p className="text-3xl font-bold text-[#C96850]">12,450€</p>
+                <p className="text-xs text-[#B8A88A] mt-1">23 retraits</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Revenue Chart */}
+          <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+            <CardHeader>
+              <CardTitle className="text-[#F5F0E8] font-fredoka">Évolution des Revenus</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 flex items-end gap-3">
+                {revenueData.map((data, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                    <div className="w-full flex flex-col gap-1">
+                      <div 
+                        className="w-full bg-[#D4AF37] rounded-t"
+                        style={{ height: `${(data.subscriptions / 15000) * 80}px` }}
+                      />
+                      <div 
+                        className="w-full bg-[#81B29A] rounded-t"
+                        style={{ height: `${(data.commissions / 15000) * 80}px` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-[#B8A88A]">{data.month}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-center gap-6 mt-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-[#D4AF37]" />
+                  <span className="text-xs text-[#B8A88A]">Abonnements</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-[#81B29A]" />
+                  <span className="text-xs text-[#B8A88A]">Commissions</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Transactions */}
+          <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+            <CardHeader>
+              <CardTitle className="text-[#F5F0E8] font-fredoka">Transactions Récentes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[
+                { user: 'Marie Crochet', type: 'Retrait', amount: '-245.67€', status: 'pending', time: 'Il y a 2h' },
+                { user: 'Sophie Artisan', type: 'Vente Patron', amount: '+12.99€', status: 'completed', time: 'Il y a 3h' },
+                { user: 'Claire Design', type: 'Abonnement Pro', amount: '+29.99€', status: 'completed', time: 'Il y a 5h' },
+                { user: 'Emma Bébé', type: 'Commission', amount: '-3.50€', status: 'completed', time: 'Il y a 6h' },
+              ].map((tx, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-[#0D0A08] rounded-lg border border-[rgba(212,175,55,0.1)]">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${tx.type.includes('Retrait') ? 'bg-[#C96850]/20' : 'bg-[#81B29A]/20'}`}>
+                      <DollarSign className={`w-4 h-4 ${tx.type.includes('Retrait') ? 'text-[#C96850]' : 'text-[#81B29A]'}`} />
+                    </div>
+                    <div>
+                      <p className="text-[#F5F0E8] text-sm">{tx.user}</p>
+                      <p className="text-xs text-[#B8A88A]">{tx.type} • {tx.time}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-medium ${tx.amount.startsWith('+') ? 'text-[#81B29A]' : 'text-[#C96850]'}`}>{tx.amount}</p>
+                    <Badge className={tx.status === 'completed' ? 'bg-[#81B29A]/20 text-[#81B29A]' : 'bg-[#D4AF37]/20 text-[#D4AF37]'}>
+                      {tx.status === 'completed' ? 'Complété' : 'En attente'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// ADMIN SETTINGS PAGE
+// ============================================
+
+function AdminSettingsPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [registrationOpen, setRegistrationOpen] = useState(true)
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#0D0A08]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#0D0A08]/95 backdrop-blur-sm border-b border-[rgba(212,175,55,0.15)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#F5F0E8]">Paramètres Système</h1>
+              <p className="text-xs text-[#B8A88A] hidden sm:block">Configurez les paramètres de la plateforme</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Platform Settings */}
+          <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+            <CardHeader>
+              <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                <Settings className="w-5 h-5 text-[#D4AF37]" /> Paramètres Généraux
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[#F5F0E8] font-medium">Mode Maintenance</p>
+                  <p className="text-xs text-[#B8A88A]">Désactive l'accès public à la plateforme</p>
+                </div>
+                <Switch checked={maintenanceMode} onCheckedChange={setMaintenanceMode} />
+              </div>
+              <Separator className="bg-[rgba(212,175,55,0.2)]" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[#F5F0E8] font-medium">Inscriptions Ouvertes</p>
+                  <p className="text-xs text-[#B8A88A]">Autoriser les nouvelles inscriptions</p>
+                </div>
+                <Switch checked={registrationOpen} onCheckedChange={setRegistrationOpen} />
+              </div>
+              <Separator className="bg-[rgba(212,175,55,0.2)]" />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[#F5F0E8] font-medium">Commission Plateforme</p>
+                  <p className="text-xs text-[#B8A88A]">Pourcentage prélevé sur chaque vente</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input className="w-20 bg-[#0D0A08] border-[rgba(212,175,55,0.2)] text-[#F5F0E8]" value="15%" />
+                  <Button variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37]">Modifier</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Security Settings */}
+          <Card className="bg-[#1A1410] border border-[rgba(212,175,55,0.2)]">
+            <CardHeader>
+              <CardTitle className="text-[#F5F0E8] font-fredoka flex items-center gap-2">
+                <Shield className="w-5 h-5 text-[#D4AF37]" /> Sécurité
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Button variant="outline" className="border-[rgba(201,104,80,0.3)] text-[#C96850] hover:bg-[rgba(201,104,80,0.1)] h-auto py-4 flex-col">
+                  <Lock className="w-5 h-5 mb-2" />
+                  <span className="text-sm">Réinitialiser MDP Admin</span>
+                </Button>
+                <Button variant="outline" className="border-[rgba(212,175,55,0.3)] text-[#D4AF37] hover:bg-[rgba(212,175,55,0.1)] h-auto py-4 flex-col">
+                  <RefreshCw className="w-5 h-5 mb-2" />
+                  <span className="text-sm">Régénérer clés API</span>
+                </Button>
+                <Button variant="outline" className="border-[rgba(129,178,154,0.3)] text-[#81B29A] hover:bg-[rgba(129,178,154,0.1)] h-auto py-4 flex-col">
+                  <Database className="w-5 h-5 mb-2" />
+                  <span className="text-sm">Backup Base de données</span>
+                </Button>
+                <Button variant="outline" className="border-[rgba(232,148,123,0.3)] text-[#E8947B] hover:bg-[rgba(232,148,123,0.1)] h-auto py-4 flex-col">
+                  <Archive className="w-5 h-5 mb-2" />
+                  <span className="text-sm">Exporter Logs</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Danger Zone */}
+          <Card className="bg-[#1A1410] border border-[rgba(201,104,80,0.3)]">
+            <CardHeader>
+              <CardTitle className="text-[#C96850] font-fredoka flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" /> Zone de Danger
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-[#C96850]/10 rounded-lg border border-[rgba(201,104,80,0.2)]">
+                <div>
+                  <p className="text-[#F5F0E8] font-medium">Vider le Cache</p>
+                  <p className="text-xs text-[#B8A88A]">Supprime tous les fichiers en cache</p>
+                </div>
+                <Button variant="destructive" className="bg-[#C96850] hover:bg-[#A85A43]">Vider</Button>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-[#C96850]/10 rounded-lg border border-[rgba(201,104,80,0.2)]">
+                <div>
+                  <p className="text-[#F5F0E8] font-medium">Réinitialiser la Plateforme</p>
+                  <p className="text-xs text-[#B8A88A]">⚠️ Cette action est irréversible</p>
+                </div>
+                <Button variant="destructive" className="bg-[#C96850] hover:bg-[#A85A43]">Réinitialiser</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// PAGE COMPONENTS
+// ============================================
+
+// Dashboard Page
+function DashboardPage({ onNavigate, onOpenSidebar }: { onNavigate: (view: ViewType) => void; onOpenSidebar: () => void }) {
+  const [activeTab, setActiveTab] = useState('Tous')
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'published': return <Badge className="bg-[#81B29A]/20 text-[#81B29A] text-xs border border-[#81B29A]/30">Publié</Badge>
+      case 'draft': return <Badge className="bg-[#B8A88A]/20 text-[#B8A88A] text-xs border border-[#B8A88A]/30">Brouillon</Badge>
+      case 'archived': return <Badge className="bg-[#E8947B]/20 text-[#E8947B] text-xs border border-[#E8947B]/30">Archivé</Badge>
+      default: return null
+    }
+  }
+
+  const filteredProjects = tableProjects.filter(project => {
+    if (activeTab === 'Tous') return true
+    if (activeTab === 'Publiés') return project.status === 'published'
+    if (activeTab === 'Brouillons') return project.status === 'draft'
+    if (activeTab === 'Archivés') return project.status === 'archived'
+    return true
+  })
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-[#FDFCF0] dark:bg-[#1A1410]">
+      {/* Header */}
+      <header className="sticky top-0 z-30 bg-[#FDFCF0]/95 dark:bg-[#1A1410]/95 backdrop-blur-sm border-b border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden hover:bg-[rgba(212,175,55,0.1)]" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-[#3D2914] dark:text-[#F5F0E8]" />
+            </Button>
+            <div>
+              <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-[#3D2914] dark:text-[#F5F0E8]">Tableau de bord</h1>
+              <p className="text-xs text-[#5C4330] dark:text-[#B8A88A] hidden sm:block">Bienvenue, Marie ! Voici vos statistiques.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 lg:gap-4">
+            <div className="hidden md:flex relative max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C4330] dark:text-[#B8A88A]" />
+              <Input placeholder="Rechercher..." className="pl-10 bg-white dark:bg-[#2D2416] border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] text-[#3D2914] dark:text-[#F5F0E8] rounded-full w-64 placeholder:text-[#5C4330]/60 dark:placeholder:text-[#B8A88A]/60" />
+            </div>
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="relative hover:bg-[rgba(212,175,55,0.1)]" onClick={() => onNavigate('messages')}>
+              <Bell className="w-5 h-5 text-[#5C4330] dark:text-[#B8A88A]" />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C96850] rounded-full text-[10px] text-white flex items-center justify-center">6</span>
+            </Button>
+            <Avatar className="w-9 h-9 border-2 border-[#D4AF37] cursor-pointer" onClick={() => onNavigate('profile')}>
+              <AvatarImage src="/images/creators/creator1.png" alt="User" />
+              <AvatarFallback className="bg-[#81B29A] text-white">ML</AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Stats Cards */}
+          <section className="animate-fade-in">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {statsCards.map((stat, index) => (
+                <Card key={index} className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] hover:shadow-lg dark:hover:shadow-[rgba(212,175,55,0.1)] transition-all duration-300">
+                  <CardContent className="p-4 lg:p-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[#5C4330] dark:text-[#B8A88A] text-sm mb-1">{stat.label}</p>
+                        <p className={`text-2xl lg:text-3xl font-bold ${isDark ? 'text-[#D4AF37]' : stat.color}`}>{stat.value}</p>
+                        <div className={`flex items-center gap-1 text-xs mt-1 ${stat.trendUp ? 'text-[#81B29A]' : 'text-[#E8947B]'}`}>
+                          {stat.trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                          {stat.trend}
+                        </div>
+                      </div>
+                      <div className={`${isDark ? 'bg-[rgba(212,175,55,0.1)]' : 'bg-opacity-10'} p-2 rounded-lg`}>
+                        <stat.icon className={`w-5 h-5 ${isDark ? 'text-[#D4AF37]' : stat.color}`} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+
+          {/* Quick Actions & Widgets Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Projects & Actions */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Quick Actions */}
+              <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                <CardContent className="p-4">
+                  <h3 className="font-fredoka text-sm font-semibold text-[#3D2914] dark:text-[#F5F0E8] mb-3 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-[#D4AF37]" /> Actions rapides
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" className="bg-[#D4AF37] hover:bg-[#F4E5C2] text-[#1A1410] rounded-lg gap-1 font-medium">
+                      <Plus className="w-4 h-4" /> Nouveau Projet
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-[#C96850] text-[#C96850] hover:bg-[#C96850] hover:text-white rounded-lg gap-1" onClick={() => onNavigate('shop-manage')}>
+                      <FileText className="w-4 h-4" /> Nouveau Patron
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-[#81B29A] text-[#81B29A] hover:bg-[#81B29A] hover:text-white rounded-lg gap-1" onClick={() => onNavigate('planner')}>
+                      <CalendarDays className="w-4 h-4" /> Planifier
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-[#E8E5D8] dark:border-[rgba(212,175,55,0.3)] text-[#3D2914] dark:text-[#F5F0E8] rounded-lg gap-1" onClick={() => onNavigate('analytics')}>
+                      <BarChart3 className="w-4 h-4" /> Statistiques
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Projects Table */}
+              <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                <CardHeader className="pb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <CardTitle className="font-fredoka text-lg text-[#3D2914] dark:text-[#F5F0E8] flex items-center gap-2">
+                      <FolderOpen className="w-5 h-5 text-[#C96850]" /> Mes Projets
+                    </CardTitle>
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                      <TabsList className="bg-[#F5F3E1] dark:bg-[#1A1410] h-auto p-1 border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)]">
+                        <TabsTrigger value="Tous" className="text-xs px-3 data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1A1410]">Tous</TabsTrigger>
+                        <TabsTrigger value="Publiés" className="text-xs px-3 data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1A1410]">Publiés</TabsTrigger>
+                        <TabsTrigger value="Brouillons" className="text-xs px-3 data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#1A1410]">Brouillons</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] text-left">
+                          <th className="pb-3 text-xs font-medium text-[#5C4330] dark:text-[#B8A88A]">Projet</th>
+                          <th className="pb-3 text-xs font-medium text-[#5C4330] dark:text-[#B8A88A] hidden sm:table-cell">Catégorie</th>
+                          <th className="pb-3 text-xs font-medium text-[#5C4330] dark:text-[#B8A88A]">Statut</th>
+                          <th className="pb-3 text-xs font-medium text-[#5C4330] dark:text-[#B8A88A] hidden md:table-cell">Stats</th>
+                          <th className="pb-3 text-xs font-medium text-[#5C4330] dark:text-[#B8A88A]">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredProjects.slice(0, 5).map((project, index) => (
+                          <tr key={project.id} className={`border-b border-[#E8E5D8]/50 dark:border-[rgba(212,175,55,0.1)] hover:bg-[#F5F3E1]/50 dark:hover:bg-[rgba(212,175,55,0.05)] transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-[#2D2416]' : 'bg-[#F5F3E1]/30 dark:bg-[#1A1410]'}`}>
+                            <td className="py-3">
+                              <div className="flex items-center gap-3">
+                                <img src={project.thumbnail} alt={project.title} className="w-10 h-10 rounded-lg object-cover" />
+                                <span className="font-medium text-[#3D2914] dark:text-[#F5F0E8] text-sm truncate max-w-[150px]">{project.title}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 hidden sm:table-cell">
+                              <Badge variant="secondary" className="bg-[#F5F3E1] dark:bg-[rgba(212,175,55,0.1)] text-[#5C4330] dark:text-[#B8A88A] text-xs border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)]">{project.category}</Badge>
+                            </td>
+                            <td className="py-3">{getStatusBadge(project.status)}</td>
+                            <td className="py-3 hidden md:table-cell">
+                              <div className="flex items-center gap-3 text-xs text-[#5C4330] dark:text-[#B8A88A]">
+                                <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-[#C96850]" />{project.likes}</span>
+                                <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{project.views}</span>
+                              </div>
+                            </td>
+                            <td className="py-3">
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]"><Edit className="w-4 h-4 text-[#5C4330] dark:text-[#B8A88A]" /></Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-[rgba(212,175,55,0.1)]"><Eye className="w-4 h-4 text-[#5C4330] dark:text-[#B8A88A]" /></Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Analytics Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="font-fredoka text-base text-[#3D2914] dark:text-[#F5F0E8] flex items-center gap-2">
+                      <TrendIcon className="w-4 h-4 text-[#C96850]" /> Évolution des abonnés
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SimpleLineChart />
+                    <div className="flex justify-between mt-2 text-xs text-[#5C4330] dark:text-[#B8A88A]">
+                      <span>1 Mars</span>
+                      <span>15 Mars</span>
+                      <span>30 Mars</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="font-fredoka text-base text-[#3D2914] dark:text-[#F5F0E8] flex items-center gap-2">
+                      <PieChart className="w-4 h-4 text-[#81B29A]" /> Répartition des likes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SimplePieChart />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Right Column - Widgets */}
+            <div className="space-y-6">
+              {/* Revenue Widget */}
+              <Card className="bg-gradient-to-br from-[#D4AF37] to-[#B8962F] border-0 text-[#1A1410] animate-fade-in shadow-lg shadow-[rgba(212,175,55,0.3)]">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-fredoka font-semibold">Revenus du mois</h3>
+                    <DollarSign className="w-5 h-5" />
+                  </div>
+                  <p className="text-3xl font-bold mb-1">{shopStats.totalSales.toFixed(2)}€</p>
+                  <p className="text-sm text-[#1A1410]/70">+23% vs mois dernier</p>
+                  <Button size="sm" variant="secondary" className="mt-3 w-full bg-white/20 hover:bg-white/30 text-[#1A1410] border-0" onClick={() => onNavigate('shop-manage')}>
+                    Voir les détails <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Activity Widget */}
+              <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                <CardHeader className="pb-2">
+                  <CardTitle className="font-fredoka text-base text-[#3D2914] dark:text-[#F5F0E8] flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-[#E8947B]" /> Activité récente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {notifications.slice(0, 4).map((notif) => (
+                    <div key={notif.id} className={`flex items-start gap-3 p-2 rounded-lg ${!notif.read ? 'bg-[#F5F3E1]/50 dark:bg-[rgba(212,175,55,0.05)]' : ''}`}>
+                      <div className="mt-0.5">{notif.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-[#3D2914] dark:text-[#F5F0E8] font-medium">{notif.title}</p>
+                        <p className="text-xs text-[#5C4330] dark:text-[#B8A88A] truncate">{notif.message}</p>
+                        <p className="text-xs text-[#5C4330]/50 dark:text-[#B8A88A]/60 mt-1">{notif.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="ghost" size="sm" className="w-full text-[#81B29A] hover:text-[#5F9A7A] text-xs" onClick={() => onNavigate('messages')}>
+                    Voir toutes les notifications
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Goals Widget */}
+              <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                <CardHeader className="pb-2">
+                  <CardTitle className="font-fredoka text-base text-[#3D2914] dark:text-[#F5F0E8] flex items-center gap-2">
+                    <Target className="w-4 h-4 text-[#C96850]" /> Objectifs du mois
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[#3D2914] dark:text-[#F5F0E8]">Publier 5 projets</span>
+                      <span className="text-[#81B29A] font-medium text-xs">3/5</span>
+                    </div>
+                    <Progress value={60} className="h-2 bg-[#F5F3E1] dark:bg-[rgba(212,175,55,0.1)] [&>div]:bg-[#81B29A]" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[#3D2914] dark:text-[#F5F0E8]">50 abonnés</span>
+                      <span className="text-[#D4AF37] font-medium text-xs">38/50</span>
+                    </div>
+                    <Progress value={76} className="h-2 bg-[#F5F3E1] dark:bg-[rgba(212,175,55,0.1)] [&>div]:bg-[#D4AF37]" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[#3D2914] dark:text-[#F5F0E8]">Vendre 10 patrons</span>
+                      <span className="text-[#C96850] font-medium text-xs">7/10</span>
+                    </div>
+                    <Progress value={70} className="h-2 bg-[#F5F3E1] dark:bg-[rgba(212,175,55,0.1)] [&>div]:bg-[#C96850]" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Suggestions Widget */}
+              <Card className="bg-white dark:bg-[#2D2416] border border-[#E8E5D8] dark:border-[rgba(212,175,55,0.2)] animate-fade-in">
+                <CardHeader className="pb-2">
+                  <CardTitle className="font-fredoka text-base text-[#3D2914] dark:text-[#F5F0E8] flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#D4AF37]" /> Suggestions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3 p-2 bg-[#F5F3E1]/50 dark:bg-[rgba(212,175,55,0.05)] rounded-lg">
+                    <Image className="w-8 h-8 text-[#81B29A]" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-[#3D2914] dark:text-[#F5F0E8]">Ajoutez des photos</p>
+                      <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Les projets avec 3+ photos ont 40% plus de likes</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-2 bg-[#F5F3E1]/50 dark:bg-[rgba(212,175,55,0.05)] rounded-lg">
+                    <Clock className="w-8 h-8 text-[#C96850]" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-[#3D2914] dark:text-[#F5F0E8]">Publiez à 18h</p>
+                      <p className="text-xs text-[#5C4330] dark:text-[#B8A88A]">Meilleur moment pour votre audience</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Messages Page
+function MessagesPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(1)
+  const [newMessage, setNewMessage] = useState('')
+
+  return (
+    <div className="flex-1 flex min-h-screen">
+      {/* Conversations List */}
+      <div className="w-80 border-r border-border dark:border-white/10 bg-white dark:bg-brown-light flex flex-col">
+        <div className="p-4 border-b border-border dark:border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-fredoka text-lg font-bold text-brown dark:text-white">Messages</h2>
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-brown dark:text-white" />
+            </Button>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-light dark:text-white/50" />
+            <Input placeholder="Rechercher..." className="pl-10 bg-cream dark:bg-brown border-border dark:border-white/10 rounded-lg" />
+          </div>
+        </div>
+        <ScrollArea className="flex-1">
+          {conversations.map((conv) => (
+            <button
+              key={conv.id}
+              onClick={() => setSelectedConversation(conv.id)}
+              className={`w-full p-4 flex items-center gap-3 hover:bg-cream/50 dark:hover:bg-white/5 transition-colors border-b border-border/50 dark:border-white/5 ${
+                selectedConversation === conv.id ? 'bg-mustard/10' : ''
+              }`}
+            >
+              <div className="relative">
+                <Avatar className="w-12 h-12">
+                  <AvatarImage src={conv.user.avatar} alt={conv.user.name} />
+                  <AvatarFallback className="bg-sage text-white">{conv.user.name[0]}</AvatarFallback>
+                </Avatar>
+                {conv.online && (
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-sage rounded-full border-2 border-white dark:border-brown-light" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-brown dark:text-white text-sm truncate">{conv.user.name}</p>
+                  <span className="text-xs text-brown-light dark:text-white/50">{conv.time}</span>
+                </div>
+                <p className="text-xs text-brown-light dark:text-white/60 truncate">{conv.lastMessage}</p>
+              </div>
+              {conv.unread > 0 && (
+                <span className="bg-terracotta text-white text-xs px-2 py-0.5 rounded-full">{conv.unread}</span>
+              )}
+            </button>
+          ))}
+        </ScrollArea>
+      </div>
+
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col bg-cream dark:bg-brown">
+        {/* Chat Header */}
+        <div className="p-4 border-b border-border dark:border-white/10 bg-white dark:bg-brown-light flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={conversations[0].user.avatar} alt={conversations[0].user.name} />
+              <AvatarFallback className="bg-sage text-white">{conversations[0].user.name[0]}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium text-brown dark:text-white">{conversations[0].user.name}</p>
+              <p className="text-xs text-sage">En ligne</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon"><Image className="w-4 h-4 text-brown-light dark:text-white/70" /></Button>
+            <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4 text-brown-light dark:text-white/70" /></Button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[70%] ${msg.isOwn ? 'order-2' : ''}`}>
+                  {!msg.isOwn && (
+                    <div className="flex items-center gap-2 mb-1">
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={msg.sender.avatar} alt={msg.sender.name} />
+                        <AvatarFallback className="bg-sage text-white text-xs">{msg.sender.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-brown-light dark:text-white/60">{msg.sender.name}</span>
+                    </div>
+                  )}
+                  <div className={`p-3 rounded-2xl ${msg.isOwn ? 'bg-mustard text-brown' : 'bg-white dark:bg-brown-light border border-border dark:border-white/10'}`}>
+                    <p className="text-sm">{msg.content}</p>
+                    {msg.image && (
+                      <img src={msg.image} alt="Shared" className="mt-2 rounded-lg max-w-full" />
+                    )}
+                  </div>
+                  <p className={`text-xs text-brown-light dark:text-white/50 mt-1 ${msg.isOwn ? 'text-right' : ''}`}>{msg.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+
+        {/* Input */}
+        <div className="p-4 border-t border-border dark:border-white/10 bg-white dark:bg-brown-light">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon"><Image className="w-5 h-5 text-brown-light dark:text-white/70" /></Button>
+            <Input 
+              placeholder="Écrire un message..." 
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              className="flex-1 bg-cream dark:bg-brown border-border dark:border-white/10 rounded-full"
+            />
+            <Button className="bg-terracotta hover:bg-terracotta-dark text-white rounded-full" size="icon">
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Comments Page
+function CommentsPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  const [filter, setFilter] = useState<'all' | 'pending' | 'reported'>('all')
+
+  const filteredComments = comments.filter(c => {
+    if (filter === 'all') return true
+    return c.status === filter
+  })
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'approved': return <Badge className="bg-sage/20 text-sage text-xs">Approuvé</Badge>
+      case 'pending': return <Badge className="bg-mustard/20 text-mustard text-xs">En attente</Badge>
+      case 'reported': return <Badge className="bg-coral/20 text-coral text-xs">Signalé</Badge>
+      default: return null
+    }
+  }
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-cream dark:bg-brown">
+      <header className="sticky top-0 z-30 bg-cream dark:bg-brown border-b border-border dark:border-white/10 px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-brown dark:text-white" />
+            </Button>
+            <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-brown dark:text-white">Gestion des commentaires</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-brown dark:text-white">{comments.length}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Total</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-mustard">{comments.filter(c => c.status === 'pending').length}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">En attente</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-coral">{comments.filter(c => c.status === 'reported').length}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Signalés</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters */}
+          <div className="flex gap-2 mb-6">
+            <Button variant={filter === 'all' ? 'default' : 'outline'} onClick={() => setFilter('all')} className={`rounded-full ${filter === 'all' ? 'bg-terracotta text-white' : ''}`}>Tous</Button>
+            <Button variant={filter === 'pending' ? 'default' : 'outline'} onClick={() => setFilter('pending')} className={`rounded-full ${filter === 'pending' ? 'bg-mustard text-brown' : ''}`}>En attente</Button>
+            <Button variant={filter === 'reported' ? 'default' : 'outline'} onClick={() => setFilter('reported')} className={`rounded-full ${filter === 'reported' ? 'bg-coral text-white' : ''}`}>Signalés</Button>
+          </div>
+
+          {/* Comments List */}
+          <div className="space-y-4">
+            {filteredComments.map((comment) => (
+              <Card key={comment.id} className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
+                      <AvatarFallback className="bg-sage text-white">{comment.user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="font-medium text-brown dark:text-white">{comment.user.name}</p>
+                          <p className="text-xs text-brown-light dark:text-white/60">sur "{comment.project}" • {comment.time}</p>
+                        </div>
+                        {getStatusBadge(comment.status)}
+                      </div>
+                      <p className="text-sm text-brown-light dark:text-white/80 mb-3">{comment.content}</p>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" className="border-sage text-sage hover:bg-sage hover:text-white rounded-lg">
+                          <ThumbsUp className="w-4 h-4 mr-1" /> {comment.likes}
+                        </Button>
+                        <Button size="sm" variant="outline" className="border-border dark:border-white/20 rounded-lg">
+                          <Reply className="w-4 h-4 mr-1" /> Répondre
+                        </Button>
+                        {comment.status === 'pending' && (
+                          <Button size="sm" className="bg-sage hover:bg-sage-dark text-white rounded-lg">
+                            <Check className="w-4 h-4 mr-1" /> Approuver
+                          </Button>
+                        )}
+                        {comment.status === 'reported' && (
+                          <Button size="sm" className="bg-coral hover:bg-coral-dark text-white rounded-lg">
+                            <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="text-brown-light dark:text-white/70">
+                          <Flag className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Analytics Page
+function AnalyticsPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-cream dark:bg-brown">
+      <header className="sticky top-0 z-30 bg-cream dark:bg-brown border-b border-border dark:border-white/10 px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-brown dark:text-white" />
+            </Button>
+            <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-brown dark:text-white">Statistiques avancées</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="border-border dark:border-white/20 rounded-lg gap-2">
+              <Download className="w-4 h-4" /> Exporter
+            </Button>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Top Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label: 'Taux d\'engagement', value: '4.8%', trend: '+0.5%', icon: Activity, color: 'terracotta' },
+              { label: 'Temps moyen de lecture', value: '2:45', trend: '+15s', icon: Clock, color: 'sage' },
+              { label: 'Portée totale', value: '45.2K', trend: '+12%', icon: Eye, color: 'mustard' },
+              { label: 'Partages', value: '892', trend: '+23%', icon: Share2, color: 'coral' },
+            ].map((stat, i) => (
+              <Card key={i} className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <stat.icon className={`w-5 h-5 text-${stat.color}`} />
+                    <span className="text-xs text-sage">{stat.trend}</span>
+                  </div>
+                  <p className="text-2xl font-bold text-brown dark:text-white mt-2">{stat.value}</p>
+                  <p className="text-xs text-brown-light dark:text-white/60">{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardHeader>
+                <CardTitle className="font-fredoka text-base text-brown dark:text-white">Évolution mensuelle</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SimpleLineChart />
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardHeader>
+                <CardTitle className="font-fredoka text-base text-brown dark:text-white">Répartition par catégorie</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SimplePieChart />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Top Projects */}
+          <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+            <CardHeader>
+              <CardTitle className="font-fredoka text-base text-brown dark:text-white flex items-center gap-2">
+                <Award className="w-5 h-5 text-mustard" /> Top 5 des projets
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {projects.slice(0, 5).map((project, i) => (
+                  <div key={project.id} className="flex items-center gap-4 p-3 bg-cream/50 dark:bg-white/5 rounded-lg">
+                    <span className={`font-bold text-lg ${i === 0 ? 'text-mustard' : i === 1 ? 'text-brown-light' : 'text-brown-light/50'}`}>#{i + 1}</span>
+                    <img src={project.image} alt={project.title} className="w-12 h-12 rounded-lg object-cover" />
+                    <div className="flex-1">
+                      <p className="font-medium text-brown dark:text-white">{project.title}</p>
+                      <p className="text-xs text-brown-light dark:text-white/60">{project.views} vues • {project.likes} likes</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-sage">{((project.likes / project.views) * 100).toFixed(1)}%</p>
+                      <p className="text-xs text-brown-light dark:text-white/60">Engagement</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Best Posting Times */}
+          <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+            <CardHeader>
+              <CardTitle className="font-fredoka text-base text-brown dark:text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-sage" /> Meilleurs horaires de publication
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-7 gap-2">
+                {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => (
+                  <div key={day} className="text-center">
+                    <p className="text-xs text-brown-light dark:text-white/60 mb-2">{day}</p>
+                    <div className="h-24 flex items-end justify-center gap-1">
+                      {[12, 8, 15, 18, 10, 20, 14].map((h, j) => (
+                        <div 
+                          key={j} 
+                          className={`w-4 rounded-t ${j === 3 ? 'bg-mustard' : 'bg-sage/30'}`} 
+                          style={{ height: `${h * 4}px` }}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-brown-light dark:text-white/60 mt-2">18h-20h</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Shop Management Page
+function ShopManagementPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-cream dark:bg-brown">
+      <header className="sticky top-0 z-30 bg-cream dark:bg-brown border-b border-border dark:border-white/10 px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-brown dark:text-white" />
+            </Button>
+            <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-brown dark:text-white">Gestion Boutique</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button className="bg-mustard hover:bg-mustard-dark text-brown rounded-lg gap-2">
+              <Plus className="w-4 h-4" /> Nouveau produit
+            </Button>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card className="bg-gradient-to-br from-mustard to-mustard-dark border-0 text-brown">
+              <CardContent className="p-4">
+                <DollarSign className="w-5 h-5 mb-2" />
+                <p className="text-2xl font-bold">{shopStats.totalSales.toFixed(2)}€</p>
+                <p className="text-xs text-brown/70">Ventes totales</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4">
+                <ShoppingBag className="w-5 h-5 text-sage mb-2" />
+                <p className="text-2xl font-bold text-brown dark:text-white">{shopStats.ordersCount}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Commandes</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4">
+                <Clock className="w-5 h-5 text-coral mb-2" />
+                <p className="text-2xl font-bold text-brown dark:text-white">{shopStats.pendingOrders}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">En attente</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4">
+                <Package className="w-5 h-5 text-sage mb-2" />
+                <p className="text-2xl font-bold text-brown dark:text-white">{shopStats.stock}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">En stock</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4">
+                <AlertTriangle className="w-5 h-5 text-coral mb-2" />
+                <p className="text-2xl font-bold text-brown dark:text-white">{shopStats.lowStock}</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Stock faible</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Products Table */}
+          <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-fredoka text-base text-brown dark:text-white">Produits</CardTitle>
+                <div className="flex gap-2">
+                  <Input placeholder="Rechercher..." className="w-48 bg-cream dark:bg-brown border-border dark:border-white/10 rounded-lg" />
+                  <Button variant="outline" className="border-border dark:border-white/20 rounded-lg">
+                    <Filter className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border dark:border-white/10 text-left">
+                      <th className="pb-3 text-xs font-medium text-brown-light dark:text-white/70">Produit</th>
+                      <th className="pb-3 text-xs font-medium text-brown-light dark:text-white/70">Prix</th>
+                      <th className="pb-3 text-xs font-medium text-brown-light dark:text-white/70">Stock</th>
+                      <th className="pb-3 text-xs font-medium text-brown-light dark:text-white/70">Ventes</th>
+                      <th className="pb-3 text-xs font-medium text-brown-light dark:text-white/70">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((product, i) => (
+                      <tr key={product.id} className={`border-b border-border/50 dark:border-white/5 ${i % 2 === 0 ? '' : 'bg-cream/30 dark:bg-white/5'}`}>
+                        <td className="py-3">
+                          <div className="flex items-center gap-3">
+                            <img src={product.image} alt={product.title} className="w-10 h-10 rounded-lg object-cover" />
+                            <div>
+                              <p className="font-medium text-brown dark:text-white text-sm">{product.title}</p>
+                              <p className="text-xs text-brown-light dark:text-white/60">{product.category}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 text-brown dark:text-white font-medium">{product.price.toFixed(2)}€</td>
+                        <td className="py-3">
+                          <Badge className="bg-sage/20 text-sage text-xs">{Math.floor(Math.random() * 50) + 10}</Badge>
+                        </td>
+                        <td className="py-3 text-brown-light dark:text-white/70">{Math.floor(Math.random() * 100)}</td>
+                        <td className="py-3">
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="w-4 h-4" /></Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Content Planner Page
+function PlannerPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-cream dark:bg-brown">
+      <header className="sticky top-0 z-30 bg-cream dark:bg-brown border-b border-border dark:border-white/10 px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-brown dark:text-white" />
+            </Button>
+            <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-brown dark:text-white">Planificateur de contenu</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button className="bg-mustard hover:bg-mustard-dark text-brown rounded-lg gap-2">
+              <Plus className="w-4 h-4" /> Nouvel événement
+            </Button>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Mini Calendar Header */}
+          <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10 mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="font-fredoka text-base text-brown dark:text-white">Mars 2024</CardTitle>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" className="border-border dark:border-white/20"><ChevronRight className="w-4 h-4 rotate-180" /></Button>
+                  <Button variant="outline" size="icon" className="border-border dark:border-white/20"><ChevronRight className="w-4 h-4" /></Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
+                  <div key={day} className="text-center text-xs text-brown-light dark:text-white/60 py-2">{day}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 35 }, (_, i) => {
+                  const day = i - 4 // Start from previous month
+                  const hasEvent = calendarEvents.some(e => parseInt(e.date.split(' ')[0]) === day)
+                  const isToday = day === 16
+                  return (
+                    <div 
+                      key={i} 
+                      className={`aspect-square flex items-center justify-center text-sm rounded-lg ${
+                        day < 1 ? 'text-brown-light/30 dark:text-white/20' : 
+                        isToday ? 'bg-mustard text-brown font-bold' : 
+                        'hover:bg-cream dark:hover:bg-white/5 cursor-pointer'
+                      }`}
+                    >
+                      {day > 0 && day <= 31 ? day : ''}
+                      {hasEvent && day > 0 && <span className="absolute -bottom-1 w-1 h-1 bg-terracotta rounded-full" />}
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Scheduled Events */}
+          <h3 className="font-fredoka text-lg font-semibold text-brown dark:text-white mb-4">Événements planifiés</h3>
+          <div className="space-y-3">
+            {calendarEvents.map((event) => (
+              <Card key={event.id} className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      event.type === 'publication' ? 'bg-terracotta/10' :
+                      event.type === 'live' ? 'bg-coral/10' :
+                      event.type === 'deadline' ? 'bg-mustard/10' : 'bg-sage/10'
+                    }`}>
+                      {event.type === 'publication' && <Camera className="w-5 h-5 text-terracotta" />}
+                      {event.type === 'live' && <Video className="w-5 h-5 text-coral" />}
+                      {event.type === 'deadline' && <AlertCircle className="w-5 h-5 text-mustard" />}
+                      {event.type === 'reminder' && <Bell className="w-5 h-5 text-sage" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-brown dark:text-white">{event.title}</p>
+                      <p className="text-xs text-brown-light dark:text-white/60">{event.date} • {event.type}</p>
+                    </div>
+                    <Badge className={`
+                      ${event.status === 'scheduled' ? 'bg-sage/20 text-sage' : 
+                        event.status === 'published' ? 'bg-terracotta/20 text-terracotta' : 
+                        'bg-muted text-brown-light'}
+                    `}>
+                      {event.status === 'scheduled' ? 'Planifié' : event.status === 'published' ? 'Publié' : 'Brouillon'}
+                    </Badge>
+                    <Button variant="ghost" size="icon"><Edit className="w-4 h-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Subscribers Page
+function SubscribersPage({ onOpenSidebar }: { onOpenSidebar: () => void }) {
+  const [filter, setFilter] = useState<'all' | 'active' | 'new' | 'inactive'>('all')
+
+  const filteredSubscribers = subscribers.filter(s => {
+    if (filter === 'all') return true
+    return s.status === filter
+  })
+
+  return (
+    <div className="flex-1 flex flex-col min-h-screen bg-cream dark:bg-brown">
+      <header className="sticky top-0 z-30 bg-cream dark:bg-brown border-b border-border dark:border-white/10 px-4 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={onOpenSidebar}>
+              <Menu className="w-5 h-5 text-brown dark:text-white" />
+            </Button>
+            <h1 className="font-fredoka text-xl lg:text-2xl font-bold text-brown dark:text-white">Gestion des abonnés</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="border-border dark:border-white/20 rounded-lg gap-2">
+              <Mail className="w-4 h-4" /> Message groupé
+            </Button>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 lg:p-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-brown dark:text-white">1,247</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Total</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-sage">892</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Actifs</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-mustard">156</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Nouveaux</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-coral">199</p>
+                <p className="text-xs text-brown-light dark:text-white/60">Inactifs</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters & Search */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brown-light dark:text-white/50" />
+              <Input placeholder="Rechercher un abonné..." className="pl-10 bg-white dark:bg-brown-light border-border dark:border-white/10 rounded-lg" />
+            </div>
+            <div className="flex gap-2">
+              {['all', 'active', 'new', 'inactive'].map((f) => (
+                <Button 
+                  key={f} 
+                  variant={filter === f ? 'default' : 'outline'} 
+                  onClick={() => setFilter(f as typeof filter)}
+                  className={`rounded-lg ${filter === f ? 'bg-terracotta text-white' : 'border-border dark:border-white/20'}`}
+                >
+                  {f === 'all' ? 'Tous' : f === 'active' ? 'Actifs' : f === 'new' ? 'Nouveaux' : 'Inactifs'}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Subscribers List */}
+          <Card className="bg-white dark:bg-brown-light border-border dark:border-white/10">
+            <CardContent className="p-0">
+              <div className="divide-y divide-border dark:divide-white/10">
+                {filteredSubscribers.map((sub) => (
+                  <div key={sub.id} className="flex items-center gap-4 p-4 hover:bg-cream/50 dark:hover:bg-white/5">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={sub.avatar} alt={sub.name} />
+                      <AvatarFallback className="bg-sage text-white">{sub.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium text-brown dark:text-white">{sub.name}</p>
+                      <p className="text-xs text-brown-light dark:text-white/60">{sub.location} • Abonné depuis {sub.joinedAt}</p>
+                    </div>
+                    <Badge className={`
+                      ${sub.status === 'active' ? 'bg-sage/20 text-sage' : 
+                        sub.status === 'new' ? 'bg-mustard/20 text-mustard' : 
+                        'bg-coral/20 text-coral'}
+                    `}>
+                      {sub.status === 'active' ? 'Actif' : sub.status === 'new' ? 'Nouveau' : 'Inactif'}
+                    </Badge>
+                    <Button variant="ghost" size="icon"><MessageSquare className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// ============================================
+// MAIN APP COMPONENT
+// ============================================
+
+export default function CrochettiApp() {
+  const [view, setView] = useState<ViewType>('landing')
+  const [theme, setTheme] = useState<Theme>('light')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
+
+  // Landing page is rendered standalone without sidebar
+  if (view === 'landing') {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <LuxuryLandingPage onNavigate={setView} />
+      </ThemeContext.Provider>
+    )
+  }
+
+  // SuperAdmin views use a different sidebar
+  const superAdminViews: ViewType[] = ['superadmin', 'admin-users', 'admin-content', 'admin-analytics', 'admin-revenue', 'admin-settings']
+  const isSuperAdminView = superAdminViews.includes(view)
+
+  if (isSuperAdminView) {
+    return (
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <div className="min-h-screen bg-[#0D0A08] flex">
+          <SuperAdminSidebar 
+            currentView={view} 
+            onNavigate={setView} 
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+          
+          <ThemeContext.Provider value={{ theme, toggleTheme }}>
+            {view === 'superadmin' && <SuperAdminDashboard onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+            {view === 'admin-users' && <AdminUsersPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+            {view === 'admin-content' && <AdminContentPage onOpenSidebar={() => setSidebarOpen(true)} />}
+            {view === 'admin-analytics' && <AdminAnalyticsPage onOpenSidebar={() => setSidebarOpen(true)} />}
+            {view === 'admin-revenue' && <AdminRevenuePage onOpenSidebar={() => setSidebarOpen(true)} />}
+            {view === 'admin-settings' && <AdminSettingsPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          </ThemeContext.Provider>
+        </div>
+      </ThemeContext.Provider>
+    )
+  }
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <div className="min-h-screen bg-cream dark:bg-brown flex">
+        <Sidebar 
+          currentView={view} 
+          onNavigate={setView} 
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+        
+        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+          {view === 'dashboard' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'messages' && <MessagesPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'comments' && <CommentsPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'analytics' && <AnalyticsPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'shop-manage' && <ShopManagementPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'planner' && <PlannerPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'subscribers' && <SubscribersPage onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'explorer' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+          {view === 'profile' && <DashboardPage onNavigate={setView} onOpenSidebar={() => setSidebarOpen(true)} />}
+        </ThemeContext.Provider>
+      </div>
+    </ThemeContext.Provider>
+  )
+}
